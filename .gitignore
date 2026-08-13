@@ -1,0 +1,39 @@
+# compiled output
+/dist
+/node_modules
+/build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.*.local
+.env.local
+
+# uploads (runtime data, not source)
+/uploads
+!/uploads/.gitkeep
+
+# IDE / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# tests
+/coverage
+/.nyc_output
+
+# typeorm
+*.sqlite
