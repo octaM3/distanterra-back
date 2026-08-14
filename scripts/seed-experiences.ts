@@ -22,7 +22,6 @@ interface SeedExperience {
   locationEn: string | null;
   descriptionEs: Block[];
   descriptionEn: Block[];
-  bosses: string[];
   displayOrder: number;
 }
 
@@ -51,7 +50,6 @@ const experiences: SeedExperience[] = [
         'Clients: CRA Exploration, RTZ Mining, MIM, Grupo Minero Aconcagua, Minera Antofalla, Andes Degerstrom, Rio Tinto, CyM Servicios Topográficos.',
       ),
     ],
-    bosses: [],
     displayOrder: 0,
   },
   {
@@ -73,7 +71,6 @@ const experiences: SeedExperience[] = [
         'Technical assistance in resistivity geophysical studies, vehicle equipment, trailers, coordination with local guides, assembly and maintenance of generators. English interpreter.',
       ),
     ],
-    bosses: ['Peter Simons'],
     displayOrder: 1,
   },
   {
@@ -91,7 +88,6 @@ const experiences: SeedExperience[] = [
         'Transportation of mineral samples from Ing. Jacobacci to ALS Mendoza (total: 15,000 meters of samples) and transport of personnel, provision of exploration supplies. English interpreter.',
       ),
     ],
-    bosses: ['Luis Fava', 'Sophia Adamopoulos', 'Carlos Cuburu'],
     displayOrder: 2,
   },
   {
@@ -101,7 +97,6 @@ const experiences: SeedExperience[] = [
     locationEn: 'La Flecha, La Rioja',
     descriptionEs: [text('Traslado de Muestras hasta Laboratorio ALS Mendoza.')],
     descriptionEn: [text('Transportation of Samples to the Laboratory ALS Mendoza.')],
-    bosses: ['Javier Nani'],
     displayOrder: 3,
   },
   {
@@ -119,7 +114,6 @@ const experiences: SeedExperience[] = [
         'Coordination of horseback riding, transportation of samples and personnel, storage, repairs and maintenance of field equipment, supervision and maintenance of vehicles assigned to the project, coordination of geodesy services, coordination of helicopter transfers, provision of exploration supplies and merchandise. English interpreter.',
       ),
     ],
-    bosses: ['Vanesa Fernández', 'José Antonio Cires Morán'],
     displayOrder: 4,
   },
   {
@@ -139,13 +133,6 @@ const experiences: SeedExperience[] = [
         'Organization of camp, transportation of samples and personnel, provision of supplies, assembly of logging equipment, supervision of vehicles and field equipment. English interpreter.',
       ),
     ],
-    bosses: [
-      'Jorge Almeida Paredes',
-      'Dan Nielsen',
-      'Dean Harmston',
-      'Pablo Ormeño',
-      'Leandro Echevarria',
-    ],
     displayOrder: 5,
   },
   {
@@ -155,7 +142,6 @@ const experiences: SeedExperience[] = [
     locationEn: null,
     descriptionEs: [text('Organización y cierre en depósito de muestras.')],
     descriptionEn: [text('Organization and closure of sample storage.')],
-    bosses: ['Adriana Blesa'],
     displayOrder: 6,
   },
   {
@@ -175,7 +161,6 @@ const experiences: SeedExperience[] = [
         'Scouting for magnetometry with helicopter, logistics and supervision in the assembly of preventive barriers against rockfalls (GEOBRUGG).',
       ),
     ],
-    bosses: ['Gustavo Racioppi'],
     displayOrder: 7,
   },
   {
@@ -193,7 +178,6 @@ const experiences: SeedExperience[] = [
         'Scouting, provision of supplies, vehicle transport, accommodation bookings, coordination of horseback riding, local guides, and surface workers.',
       ),
     ],
-    bosses: ['Juan Burlando'],
     displayOrder: 8,
   },
   {
@@ -239,30 +223,6 @@ const experiences: SeedExperience[] = [
         'Logistical Assistance for Visit to the Payunia Volcanic Area, Malargüe, Mendoza.',
       ]),
     ],
-    bosses: [
-      'Benjamin Brooks',
-      'Lindsay Schoenbohom',
-      'Wendy Bohon',
-      'Jorge Barón',
-      'Frederic Blume',
-      'Victor Ramos',
-      'Esteban Lanutti',
-      'Irene Perez',
-      'Jeremy Rimando',
-      'Peter Enderlin',
-      'Todd Ericksen',
-      'Robert Smalley',
-      'Carlos Costa',
-      'Carlos Gardini',
-      'Emilio Ahumada',
-      'Andres Richard',
-      'Alberto Caselli',
-      'Laura Velez',
-      'Cintia Bengoa',
-      'Guido Mazzolenni',
-      'Giorgio Pascuare',
-      'Eduardo Llambias',
-    ],
     displayOrder: 9,
   },
 ];
@@ -293,11 +253,10 @@ async function main() {
       // Idempotencia: se elimina la fila anterior con el mismo título (ES) antes de reinsertar.
       await client.query('DELETE FROM experiences WHERE title_es = $1', [exp.titleEs]);
 
-      const result = await client.query(
+      await client.query(
         `INSERT INTO experiences
            (title_es, title_en, location_es, location_en, description_es, description_en, display_order, is_active)
-         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, true)
-         RETURNING id`,
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, true)`,
         [
           exp.titleEs,
           exp.titleEn,
@@ -308,15 +267,6 @@ async function main() {
           exp.displayOrder,
         ],
       );
-      const experienceId = result.rows[0].id;
-
-      for (let i = 0; i < exp.bosses.length; i++) {
-        await client.query(
-          'INSERT INTO experience_bosses (experience_id, name, display_order) VALUES ($1, $2, $3)',
-          [experienceId, exp.bosses[i], i],
-        );
-      }
-
       console.log(`[seed-experiences] Insertada: ${exp.titleEs}`);
     }
 

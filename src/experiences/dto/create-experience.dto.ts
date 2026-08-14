@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsInt,
@@ -42,13 +41,6 @@ export class CreateExperienceDto {
   @ValidateNested({ each: true })
   @Type(() => DescriptionBlockDto)
   descriptionEn: DescriptionBlockDto[];
-
-  /** Nombres de los jefes / responsables del proyecto. Opcional, de cero a muchos. */
-  @IsOptional()
-  @IsArray()
-  @ArrayMaxSize(50)
-  @IsString({ each: true })
-  bosses?: string[];
 
   @IsOptional()
   @Type(() => Number)

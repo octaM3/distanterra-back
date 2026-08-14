@@ -3,11 +3,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ExperienceBoss } from './experience-boss.entity';
 import { ExperienceDescriptionBlock } from './experience-description-block';
 
 @Entity({ name: 'experiences' })
@@ -38,11 +36,6 @@ export class Experience {
 
   @Column({ type: 'boolean', name: 'is_active', default: true })
   isActive: boolean;
-
-  @OneToMany(() => ExperienceBoss, (boss) => boss.experience, {
-    cascade: true,
-  })
-  bosses: ExperienceBoss[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -19,7 +19,7 @@ Repository: https://github.com/octaM3/distanterra-back
   - **Images/logos** (partner logos shown at the bottom of the landing page) — hard
     delete (file + row removed together).
   - **Experiences** (title, optional location, dynamic rich description made of text
-    and list blocks, zero or more bosses/"jefes") — soft delete.
+    and list blocks) — soft delete.
 - Every admin-editable piece of content that has copy is **bilingual** (`_es` / `_en`
   columns), matching the frontend's i18n setup.
 - Uploaded images are stored on local disk (`UPLOADS_DIR`) and served statically at
@@ -180,9 +180,6 @@ free text and itemized lists, in any order:
   { "type": "text", "content": "Closing paragraph..." }
 ]
 ```
-
-`bosses` is a plain array of strings (e.g. `["Peter Simons", "Sophia Adamopoulos"]`),
-optional and unbounded.
 
 ## Deployment (Hostinger VPS)
 

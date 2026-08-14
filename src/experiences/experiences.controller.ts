@@ -16,49 +16,38 @@ import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { ExperiencesService } from './experiences.service';
 
-interface ExperienceResponse extends Omit<Experience, 'bosses'> {
-  bosses: string[];
-}
-
 @Controller()
 export class ExperiencesController {
   private readonly logger = new Logger(ExperiencesController.name);
 
   constructor(private readonly experiencesService: ExperiencesService) {}
 
-  /** Aplana la lista de objetos ExperienceBoss a un arreglo de strings con solo el nombre. */
-  private toResponse(experience: Experience): ExperienceResponse {
-    const { bosses, ...rest } = experience;
-    return { ...rest, bosses: (bosses ?? []).map((b) => b.name) };
-  }
-
   // ---- Endpoints públicos ----
 
   @Get('experiences')
-  async findPublic(): Promise<ExperienceResponse[]> {
+  async findPublic(): Promise<Experience[]> {
     this.logger.debug('GET /api/experiences - vista pública');
     const experiences = await this.experiencesService.findPublic();
     this.logger.debug(`Devolviendo ${experiences.length} experiencia(s) activa(s)`);
-    return experiences.map((e) => this.toResponse(e));
+    return experiences;
   }
 
   // ---- Endpoints de administración ----
 
   @UseGuards(JwtAuthGuard)
   @Get('admin/experiences')
-  async findAllForAdmin(): Promise<ExperienceResponse[]> {
+  async findAllForAdmin(): Promise<Experience[]> {
     this.logger.debug('GET /api/admin/experiences');
     const experiences = await this.experiencesService.findAllForAdmin();
     this.logger.debug(`Devolviendo ${experiences.length} experiencia(s) totales`);
-    return experiences.map((e) => this.toResponse(e));
+    return experiences;
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('admin/experiences')
-  async create(@Body() dto: CreateExperienceDto): Promise<ExperienceResponse> {
+  async create(@Body() dto: CreateExperienceDto): Promise<Experience> {
     this.logger.log(`POST /api/admin/experiences - título ES: "${dto.titleEs}"`);
-    const experience = await this.experiencesService.create(dto);
-    return this.toResponse(experience);
+    return this.experiencesService.create(dto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,10 +55,9 @@ export class ExperiencesController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateExperienceDto,
-  ): Promise<ExperienceResponse> {
+  ): Promise<Experience> {
     this.logger.log(`PUT /api/admin/experiences/${id}`);
-    const experience = await this.experiencesService.update(id, dto);
-    return this.toResponse(experience);
+    return this.experiencesService.update(id, dto);
   }
 
   @UseGuards(JwtAuthGuard)
