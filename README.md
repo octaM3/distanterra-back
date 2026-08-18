@@ -13,7 +13,10 @@ Repository: https://github.com/octaM3/distanterra-back
   can't be discovered by guessing common routes.
 - No public registration endpoint. The single admin account is created with a CLI
   script (`npm run db:seed-admin`), never over HTTP.
-- Brute-force protection on the login endpoint via `@nestjs/throttler`.
+- Rate limiting via `@nestjs/throttler`, applied globally to every endpoint
+  (`THROTTLE_LIMIT` per `THROTTLE_TTL_SECONDS`, generous default), plus a separate,
+  much stricter limit on the login endpoint specifically (`LOGIN_THROTTLE_LIMIT` per
+  `LOGIN_THROTTLE_TTL_SECONDS`) to slow down brute-force password guessing.
 - CRUD (ABM) for:
   - **Comments/testimonials** (client name, photo, comment) — soft delete.
   - **Images/logos** (partner logos shown at the bottom of the landing page) — hard
@@ -42,7 +45,8 @@ distanterra-back/
 ├── sql/                     # Raw SQL DDL, run in filename order
 ├── scripts/
 │   ├── init-db.ts           # Runs every sql/*.sql file against the configured DB
-│   └── seed-admin.ts        # Creates/updates the single admin account
+│   ├── seed-admin.ts        # Creates/updates the single admin account
+│   └── seed-experiences.ts  # One-off import of the original hardcoded experiences
 ├── src/
 │   ├── auth/                # Login (hidden path), JWT strategy/guard
 │   ├── comments/             # Testimonials ABM
@@ -83,6 +87,8 @@ Edit `.env` and fill in real values, especially:
 - `ADMIN_LOGIN_PATH` — change the default to your own secret path before deploying.
 - `DB_*` — your PostgreSQL connection details.
 - `SEED_ADMIN_USERNAME` / `SEED_ADMIN_PASSWORD` — used only once, by the seed script.
+- `THROTTLE_LIMIT` / `THROTTLE_TTL_SECONDS` — global rate limit. If you get blocked
+  while actively using the admin panel in local dev, raise `THROTTLE_LIMIT`.
 
 ### 4. Create the database schema
 
@@ -148,7 +154,7 @@ All routes are prefixed with `/api`.
 | GET    | `/comments`                       | none  | Active testimonials (public)          |
 | GET    | `/admin/comments`                 | JWT   | All testimonials (admin)              |
 | POST   | `/admin/comments`                 | JWT   | Create testimonial (multipart, `photo`) |
-| PUT    | `/admin/comments/:id`             | JWT   | Update testimonial                    |
+| PUT    | `/admin/comments/:id`             | JWT   | Update testimonial (multipart, optional new `photo`) |
 | DELETE | `/admin/comments/:id`             | JWT   | Soft-delete testimonial                |
 | GET    | `/images`                         | none  | Logos (public)                         |
 | GET    | `/admin/images`                   | JWT   | Logos (admin)                          |
@@ -202,7 +208,13 @@ This API is designed to run alongside the frontend and PostgreSQL on the same VP
 - Passwords are hashed with `bcrypt` (cost factor 12); plaintext passwords are never stored.
 - The JWT is only ever transmitted via an `httpOnly`, `sameSite=strict` cookie — not
   accessible to client-side JavaScript, mitigating XSS-based token theft.
-- Login attempts are rate-limited (`LOGIN_THROTTLE_LIMIT` per `LOGIN_THROTTLE_TTL_SECONDS`).
+- Every endpoint is rate-limited (`THROTTLE_LIMIT` per `THROTTLE_TTL_SECONDS`); the login
+  endpoint additionally has its own, much stricter limit (`LOGIN_THROTTLE_LIMIT` per
+  `LOGIN_THROTTLE_TTL_SECONDS`) read directly from `process.env`, independent of the
+  global one.
+- Static uploads (`/uploads/...`) are served with `Cross-Origin-Resource-Policy:
+  cross-origin` (Helmet's default `same-origin` would otherwise make browsers block
+  `<img>` loads from the frontend's origin).
 - `validateAdmin` always runs a `bcrypt.compare` (against a dummy hash if the username
   doesn't exist) to avoid leaking valid usernames via response timing.
 - Uploaded files are validated by MIME type and renamed to random UUIDs on disk —
