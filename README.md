@@ -32,8 +32,9 @@ Repository: https://github.com/octaM3/distanterra-back
 
 ## Tech stack
 
-- Node.js >= 20 (tested with v22.23.1) — see `.nvmrc`-style requirement in `package.json` `engines`.
-- NestJS 11, TypeORM 0.3, PostgreSQL (`pg` driver).
+- Node.js >= 20 — developed/tested with **v22.23.1** (see `engines` in `package.json`).
+- NestJS 11, TypeORM 0.3, PostgreSQL (`pg` driver) — developed/tested with
+  **PostgreSQL 18.6**. Use the same major version on the VPS to avoid surprises.
 - `passport-jwt` + `@nestjs/jwt` for authentication, `bcrypt` for password hashing.
 - `class-validator` / `class-transformer` for request validation.
 - `helmet`, `cookie-parser`, `@nestjs/throttler` for baseline security hardening.
@@ -66,8 +67,8 @@ distanterra-back/
 
 ### 1. Prerequisites
 
-- Node.js 20+ (project uses v22.23.1).
-- A running PostgreSQL instance (local or remote).
+- Node.js 20+ (project uses **v22.23.1**).
+- A running PostgreSQL instance, local or remote (project uses **PostgreSQL 18.6**).
 
 ### 2. Install dependencies
 
@@ -189,7 +190,9 @@ free text and itemized lists, in any order:
 
 ## Deployment (Hostinger VPS)
 
-This API is designed to run alongside the frontend and PostgreSQL on the same VPS:
+This API is designed to run alongside the frontend and PostgreSQL on the same VPS. Install
+**Node.js v22.23.1** and **PostgreSQL 18.6** (or the closest available versions) to match
+the versions this project was developed and tested against:
 
 1. Provision PostgreSQL on the VPS (or use Hostinger's managed PostgreSQL if available).
 2. Clone this repo, `npm install`, `npm run build`.
