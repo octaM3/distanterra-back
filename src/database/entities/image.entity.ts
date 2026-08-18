@@ -14,12 +14,6 @@ export class Image {
   @Column({ type: 'varchar', length: 500, name: 'file_path' })
   filePath: string;
 
-  @Column({ type: 'varchar', length: 255, name: 'alt_text_es', nullable: true })
-  altTextEs: string | null;
-
-  @Column({ type: 'varchar', length: 255, name: 'alt_text_en', nullable: true })
-  altTextEn: string | null;
-
   @Column({ type: 'int', name: 'display_order', default: 0 })
   displayOrder: number;
 

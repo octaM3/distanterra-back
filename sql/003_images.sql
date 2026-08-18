@@ -5,8 +5,6 @@
 CREATE TABLE IF NOT EXISTS images (
     id            SERIAL PRIMARY KEY,
     file_path     VARCHAR(500) NOT NULL,
-    alt_text_es   VARCHAR(255),
-    alt_text_en   VARCHAR(255),
     display_order INTEGER NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()

@@ -23,7 +23,15 @@ async function bootstrap() {
   logger.log(`Entorno: ${env}`);
   logger.log(`Orígenes CORS permitidos: ${corsOrigins.join(', ')}`);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      // Por defecto helmet setea CORP "same-origin", lo que bloquea en el
+      // navegador la carga de <img src="..."> hacia /uploads cuando el
+      // front vive en otro origen (otro puerto en local, otro subdominio
+      // en producción).
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   logger.log('Middleware Helmet activado');
 
   app.use(cookieParser());

@@ -26,8 +26,8 @@ import { ExperiencesModule } from './experiences/experiences.module';
       useFactory: (configService: ConfigService<AppConfig, true>) => ({
         throttlers: [
           {
-            ttl: configService.get('loginThrottle.ttlSeconds', { infer: true }) * 1000,
-            limit: configService.get('loginThrottle.limit', { infer: true }),
+            ttl: configService.get('throttle.ttlSeconds', { infer: true }) * 1000,
+            limit: configService.get('throttle.limit', { infer: true }),
           },
         ],
       }),

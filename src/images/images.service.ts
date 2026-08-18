@@ -48,8 +48,6 @@ export class ImagesService {
     this.logger.log(`Creando imagen: ruta="${filePath}"`);
     const image = this.imageRepository.create({
       filePath,
-      altTextEs: dto.altTextEs ?? null,
-      altTextEn: dto.altTextEn ?? null,
       displayOrder: dto.displayOrder ?? 0,
     });
     const saved = await this.imageRepository.save(image);
@@ -60,8 +58,6 @@ export class ImagesService {
   async update(id: number, dto: UpdateImageDto): Promise<Image> {
     this.logger.log(`Actualizando imagen id=${id}`);
     const image = await this.findOneOrFail(id);
-    if (dto.altTextEs !== undefined) image.altTextEs = dto.altTextEs;
-    if (dto.altTextEn !== undefined) image.altTextEn = dto.altTextEn;
     if (dto.displayOrder !== undefined) image.displayOrder = dto.displayOrder;
     const saved = await this.imageRepository.save(image);
     this.logger.log(`Imagen id=${id} actualizada correctamente`);

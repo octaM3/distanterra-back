@@ -25,6 +25,11 @@ import { JwtPayload } from './jwt-payload.interface';
 // No existe ningún enlace a esta ruta en el frontend público.
 const ADMIN_LOGIN_PATH = process.env.ADMIN_LOGIN_PATH ?? '/gestion-x9k2/acceso';
 
+// Límite estricto y propio para el login (independiente del límite global por defecto
+// en app.module.ts), para frenar intentos de fuerza bruta sobre la contraseña.
+const LOGIN_THROTTLE_LIMIT = parseInt(process.env.LOGIN_THROTTLE_LIMIT ?? '5', 10);
+const LOGIN_THROTTLE_TTL_MS = parseInt(process.env.LOGIN_THROTTLE_TTL_SECONDS ?? '60', 10) * 1000;
+
 @Controller()
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -36,7 +41,7 @@ export class AuthController {
 
   @Post(ADMIN_LOGIN_PATH)
   @HttpCode(200)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: LOGIN_THROTTLE_LIMIT, ttl: LOGIN_THROTTLE_TTL_MS } })
   async login(
     @Body() loginDto: LoginDto,
     @Req() req: Request,

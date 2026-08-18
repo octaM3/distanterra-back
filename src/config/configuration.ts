@@ -21,7 +21,10 @@ export interface AppConfig {
     dir: string;
     maxSizeBytes: number;
   };
-  loginThrottle: {
+  // Límite global aplicado a todos los endpoints (vía APP_GUARD en app.module.ts).
+  // El endpoint de login tiene su propio límite, más estricto, definido directamente
+  // en auth.controller.ts con las variables LOGIN_THROTTLE_*.
+  throttle: {
     ttlSeconds: number;
     limit: number;
   };
@@ -53,8 +56,8 @@ export default (): AppConfig => ({
     dir: process.env.UPLOADS_DIR ?? './uploads',
     maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES ?? '5242880', 10),
   },
-  loginThrottle: {
-    ttlSeconds: parseInt(process.env.LOGIN_THROTTLE_TTL_SECONDS ?? '60', 10),
-    limit: parseInt(process.env.LOGIN_THROTTLE_LIMIT ?? '5', 10),
+  throttle: {
+    ttlSeconds: parseInt(process.env.THROTTLE_TTL_SECONDS ?? '60', 10),
+    limit: parseInt(process.env.THROTTLE_LIMIT ?? '60', 10),
   },
 });

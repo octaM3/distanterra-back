@@ -17,6 +17,8 @@ export const envValidationSchema = Joi.object({
   DB_SSL: Joi.string().valid('true', 'false').default('false'),
   UPLOADS_DIR: Joi.string().default('./uploads'),
   MAX_UPLOAD_SIZE_BYTES: Joi.number().default(5242880),
+  THROTTLE_TTL_SECONDS: Joi.number().default(60),
+  THROTTLE_LIMIT: Joi.number().default(60),
   LOGIN_THROTTLE_TTL_SECONDS: Joi.number().default(60),
   LOGIN_THROTTLE_LIMIT: Joi.number().default(5),
   SEED_ADMIN_USERNAME: Joi.string().optional(),
