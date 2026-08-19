@@ -9,7 +9,9 @@ import { envValidationSchema } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { CommentsModule } from './comments/comments.module';
+import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { ImagesModule } from './images/images.module';
+import { GalleryModule } from './gallery/gallery.module';
 import { ExperiencesModule } from './experiences/experiences.module';
 
 @Module({
@@ -46,7 +48,9 @@ import { ExperiencesModule } from './experiences/experiences.module';
     AuthModule,
     CommentsModule,
     ImagesModule,
+    GalleryModule,
     ExperiencesModule,
+    ContactMessagesModule,
   ],
   providers: [
     {
