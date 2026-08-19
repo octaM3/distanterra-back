@@ -27,6 +27,10 @@ Repository: https://github.com/octaM3/distanterra-back
   columns), matching the frontend's i18n setup.
 - Uploaded images are stored on local disk (`UPLOADS_DIR`) and served statically at
   `/uploads/...`, which fits the "everything on one Hostinger VPS" deployment target.
+- Gallery photos are optimized on upload with `sharp` (`common/utils/image-optimizer.util.ts`):
+  resized to fit within 1920×1920 (aspect ratio preserved, never upscaled) and
+  recompressed as WebP, so heavy camera-original photos never get served as-is.
+  SVG/GIF are stored untouched. Upload is capped at 15MB before optimization.
 - Database schema is plain, versioned SQL files under [`sql/`](./sql), no ORM
   migrations magic — run once with `npm run db:init`.
 
@@ -38,6 +42,7 @@ Repository: https://github.com/octaM3/distanterra-back
 - `passport-jwt` + `@nestjs/jwt` for authentication, `bcrypt` for password hashing.
 - `class-validator` / `class-transformer` for request validation.
 - `helmet`, `cookie-parser`, `@nestjs/throttler` for baseline security hardening.
+- `sharp` for server-side image resizing/compression (gallery uploads).
 
 ## Project layout
 
@@ -142,6 +147,9 @@ The API listens on `PORT` (default `3001`) under the `/api` prefix, e.g.
    to avoid exposing the token to JS/XSS.
 4. `POST /api/admin/logout` clears the cookie. `GET /api/admin/me` returns the current
    admin's identity, used by the frontend to check session status on load.
+5. `POST /api/admin/change-password` lets the logged-in admin change their own password
+   (current password required). The target admin is always taken from the JWT — there's
+   no way to change another admin's password through this endpoint.
 
 ## API overview
 
@@ -152,6 +160,7 @@ All routes are prefixed with `/api`.
 | POST   | `/{ADMIN_LOGIN_PATH}`             | none  | Admin login, sets session cookie      |
 | POST   | `/admin/logout`                   | JWT   | Clears session cookie                 |
 | GET    | `/admin/me`                       | JWT   | Current admin identity                |
+| POST   | `/admin/change-password`          | JWT   | Change own password (current password required) |
 | GET    | `/comments`                       | none  | Active testimonials (public)          |
 | GET    | `/admin/comments`                 | JWT   | All testimonials (admin)              |
 | POST   | `/admin/comments`                 | JWT   | Create testimonial (multipart, `photo`) |
@@ -162,6 +171,11 @@ All routes are prefixed with `/api`.
 | POST   | `/admin/images`                   | JWT   | Upload logo (multipart, `image`)      |
 | PUT    | `/admin/images/:id`                | JWT   | Update logo metadata                   |
 | DELETE | `/admin/images/:id`                | JWT   | Delete logo (file + row)              |
+| GET    | `/gallery?offset=&limit=`         | none  | Gallery photos, paginated (public). `limit` defaults to 16, max 48. Response: `{ items, hasMore }` |
+| GET    | `/admin/gallery`                  | JWT   | Gallery photos, unpaginated (admin)   |
+| POST   | `/admin/gallery`                  | JWT   | Upload gallery photo (multipart, `image`), optimized server-side (see above) |
+| PUT    | `/admin/gallery/:id`               | JWT   | Update gallery photo metadata          |
+| DELETE | `/admin/gallery/:id`               | JWT   | Delete gallery photo (file + row)     |
 | GET    | `/experiences`                    | none  | Active experiences (public)           |
 | GET    | `/admin/experiences`              | JWT   | All experiences (admin)               |
 | POST   | `/admin/experiences`               | JWT   | Create experience                      |

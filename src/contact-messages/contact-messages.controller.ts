@@ -43,6 +43,13 @@ export class ContactMessagesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('admin/contact-messages/unread-count')
+  async countUnread(): Promise<{ count: number }> {
+    const count = await this.contactMessagesService.countUnread();
+    return { count };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Put('admin/contact-messages/:id/read')
   async markAsRead(@Param('id', ParseIntPipe) id: number): Promise<ContactMessage> {
     this.logger.log(`PUT /api/admin/contact-messages/${id}/read`);

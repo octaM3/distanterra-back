@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -44,5 +49,33 @@ export class AuthService {
     const payload: JwtPayload = { sub: admin.id, username: admin.username };
     this.logger.debug(`JWT generado para administrador "${admin.username}" (id=${admin.id})`);
     return this.jwtService.sign(payload);
+  }
+
+  // Solo permite que un administrador cambie SU PROPIA contraseña: el id sale del
+  // JWT de la sesión activa (CurrentAdmin), nunca de un parámetro provisto por el cliente.
+  async changePassword(
+    adminId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const admin = await this.adminRepository
+      .createQueryBuilder('admin')
+      .addSelect('admin.passwordHash')
+      .where('admin.id = :id', { id: adminId })
+      .getOne();
+
+    if (!admin) {
+      throw new UnauthorizedException('Sesión inválida');
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, admin.passwordHash);
+    if (!isValid) {
+      this.logger.warn(`Cambio de contraseña rechazado para "${admin.username}": contraseña actual incorrecta`);
+      throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+
+    admin.passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.adminRepository.save(admin);
+    this.logger.log(`Contraseña actualizada para administrador "${admin.username}" (id=${admin.id})`);
   }
 }

@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -18,14 +19,21 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AppConfig } from '@/config/configuration';
 import { GalleryImage } from '@/database/entities/gallery-image.entity';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
-import { buildImageMulterOptions } from '@/common/utils/file-upload.util';
+import { buildImageMemoryMulterOptions } from '@/common/utils/file-upload.util';
+import { optimizeAndSaveImage } from '@/common/utils/image-optimizer.util';
 import { toPublicFileUrl } from '@/common/utils/public-url.util';
 import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
+import { GalleryPaginationDto } from './dto/gallery-pagination.dto';
 import { UpdateGalleryImageDto } from './dto/update-gallery-image.dto';
 import { GalleryService } from './gallery.service';
 
 interface GalleryImageResponse extends Omit<GalleryImage, 'filePath'> {
   url: string;
+}
+
+interface GalleryPageResponse {
+  items: GalleryImageResponse[];
+  hasMore: boolean;
 }
 
 @Controller()
@@ -47,11 +55,13 @@ export class GalleryController {
   // ---- Endpoints públicos ----
 
   @Get('gallery')
-  async findPublic(): Promise<GalleryImageResponse[]> {
-    this.logger.debug('GET /api/gallery - vista pública');
-    const images = await this.galleryService.findPublic();
-    this.logger.debug(`Devolviendo ${images.length} foto(s)`);
-    return images.map((img) => this.toResponse(img));
+  async findPublic(@Query() query: GalleryPaginationDto): Promise<GalleryPageResponse> {
+    const offset = query.offset ?? 0;
+    const limit = query.limit ?? 16;
+    this.logger.debug(`GET /api/gallery - vista pública (offset=${offset}, limit=${limit})`);
+    const { items, hasMore } = await this.galleryService.findPublic(offset, limit);
+    this.logger.debug(`Devolviendo ${items.length} foto(s), hasMore=${hasMore}`);
+    return { items: items.map((img) => this.toResponse(img)), hasMore };
   }
 
   // ---- Endpoints de administración ----
@@ -67,7 +77,7 @@ export class GalleryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('admin/gallery')
-  @UseInterceptors(FileInterceptor('image', buildImageMulterOptions('gallery')))
+  @UseInterceptors(FileInterceptor('image', buildImageMemoryMulterOptions()))
   async create(
     @Body() dto: CreateGalleryImageDto,
     @UploadedFile() file: Express.Multer.File | undefined,
@@ -76,8 +86,9 @@ export class GalleryController {
       this.logger.warn('POST /api/admin/gallery - no se adjuntó ningún archivo');
       throw new BadRequestException('Debe adjuntar un archivo de imagen');
     }
-    this.logger.log(`POST /api/admin/gallery - archivo: ${file.filename}`);
-    const image = await this.galleryService.create(dto, `gallery/${file.filename}`);
+    this.logger.log(`POST /api/admin/gallery - archivo: "${file.originalname}"`);
+    const filePath = await optimizeAndSaveImage(file, 'gallery');
+    const image = await this.galleryService.create(dto, filePath);
     return this.toResponse(image);
   }
 

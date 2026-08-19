@@ -1,6 +1,6 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync } from 'fs';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -14,6 +14,31 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/gif',
   'image/svg+xml',
 ]);
+
+// Tamaño máximo aceptado para el archivo tal como lo sube el cliente (antes de
+// cualquier optimización). Suficiente para una foto sin comprimir de una
+// cámara o celular; evita que una subida enorme se cargue entera en memoria.
+const MAX_UPLOAD_SIZE_BYTES = 15 * 1024 * 1024;
+
+const imageFileFilter = (
+  _req: unknown,
+  file: { mimetype: string; originalname: string },
+  callback: (error: Error | null, acceptFile: boolean) => void,
+) => {
+  if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+    logger.warn(
+      `Tipo de archivo rechazado: "${file.mimetype}" (archivo: "${file.originalname}")`,
+    );
+    callback(
+      new BadRequestException(
+        'Tipo de archivo no permitido. Solo se aceptan imagenes (jpeg, png, webp, gif, svg).',
+      ),
+      false,
+    );
+    return;
+  }
+  callback(null, true);
+};
 
 /**
  * Construye las opciones de multer para guardar imágenes en disco local,
@@ -41,24 +66,20 @@ export function buildImageMulterOptions(subfolder: string) {
         callback(null, generatedName);
       },
     }),
-    fileFilter: (
-      _req: unknown,
-      file: { mimetype: string; originalname: string },
-      callback: (error: Error | null, acceptFile: boolean) => void,
-    ) => {
-      if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-        logger.warn(
-          `Tipo de archivo rechazado: "${file.mimetype}" (archivo: "${file.originalname}")`,
-        );
-        callback(
-          new BadRequestException(
-            'Tipo de archivo no permitido. Solo se aceptan imagenes (jpeg, png, webp, gif, svg).',
-          ),
-          false,
-        );
-        return;
-      }
-      callback(null, true);
-    },
+    fileFilter: imageFileFilter,
+    limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
+  };
+}
+
+/**
+ * Variante en memoria: no escribe nada a disco por sí sola. Se usa cuando el
+ * archivo subido debe procesarse (redimensionar/recomprimir) antes de
+ * guardarse — ver optimizeAndSaveImage en image-optimizer.util.ts.
+ */
+export function buildImageMemoryMulterOptions() {
+  return {
+    storage: memoryStorage(),
+    fileFilter: imageFileFilter,
+    limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
   };
 }

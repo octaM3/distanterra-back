@@ -21,6 +21,12 @@ export class ContactMessagesService {
     });
   }
 
+  /** Admin: cantidad de mensajes sin leer, para el badge del panel. */
+  countUnread(): Promise<number> {
+    this.logger.debug('Contando mensajes de contacto sin leer');
+    return this.contactMessageRepository.count({ where: { isRead: false } });
+  }
+
   async findOneOrFail(id: number): Promise<ContactMessage> {
     const message = await this.contactMessageRepository.findOne({ where: { id } });
     if (!message) {

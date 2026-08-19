@@ -15,6 +15,7 @@ import { Request, Response } from 'express';
 import { AppConfig } from '@/config/configuration';
 import { AuthService } from './auth.service';
 import { CurrentAdmin } from './current-admin.decorator';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtPayload } from './jwt-payload.interface';
@@ -83,5 +84,19 @@ export class AuthController {
   me(@CurrentAdmin() admin: JwtPayload): JwtPayload {
     this.logger.debug(`Verificación de sesión activa para "${admin.username}"`);
     return admin;
+  }
+
+  // Cambia la contraseña del administrador autenticado. El id se toma del JWT
+  // de la sesión (CurrentAdmin), por lo que un administrador solo puede cambiar
+  // su propia contraseña, nunca la de otro.
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/change-password')
+  @HttpCode(200)
+  async changePassword(
+    @CurrentAdmin() admin: JwtPayload,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<{ ok: true }> {
+    await this.authService.changePassword(admin.sub, dto.currentPassword, dto.newPassword);
+    return { ok: true };
   }
 }

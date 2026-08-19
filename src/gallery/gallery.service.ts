@@ -21,11 +21,19 @@ export class GalleryService {
     private readonly galleryImageRepository: Repository<GalleryImage>,
   ) {}
 
-  findPublic(): Promise<GalleryImage[]> {
-    this.logger.debug('Obteniendo fotos de la galería para vista pública');
-    return this.galleryImageRepository.find({
+  /**
+   * Vista pública paginada. Pide "limit + 1" filas para saber si hay una
+   * página siguiente sin necesidad de un COUNT(*) aparte.
+   */
+  async findPublic(offset: number, limit: number): Promise<{ items: GalleryImage[]; hasMore: boolean }> {
+    this.logger.debug(`Obteniendo fotos de la galería para vista pública (offset=${offset}, limit=${limit})`);
+    const rows = await this.galleryImageRepository.find({
       order: { displayOrder: 'ASC', createdAt: 'ASC' },
+      skip: offset,
+      take: limit + 1,
     });
+    const hasMore = rows.length > limit;
+    return { items: hasMore ? rows.slice(0, limit) : rows, hasMore };
   }
 
   findAllForAdmin(): Promise<GalleryImage[]> {
