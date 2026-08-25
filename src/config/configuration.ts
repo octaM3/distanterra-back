@@ -28,6 +28,9 @@ export interface AppConfig {
     ttlSeconds: number;
     limit: number;
   };
+  contact: {
+    emailCooldownHours: number;
+  };
 }
 
 export default (): AppConfig => ({
@@ -54,10 +57,13 @@ export default (): AppConfig => ({
   },
   uploads: {
     dir: process.env.UPLOADS_DIR ?? './uploads',
-    maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES ?? '5242880', 10),
+    maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES ?? '6291456', 10),
   },
   throttle: {
     ttlSeconds: parseInt(process.env.THROTTLE_TTL_SECONDS ?? '60', 10),
     limit: parseInt(process.env.THROTTLE_LIMIT ?? '60', 10),
+  },
+  contact: {
+    emailCooldownHours: parseInt(process.env.CONTACT_EMAIL_COOLDOWN_HOURS ?? '24', 10),
   },
 });

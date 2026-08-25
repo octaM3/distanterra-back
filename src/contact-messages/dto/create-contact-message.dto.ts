@@ -21,4 +21,11 @@ export class CreateContactMessageDto {
   @IsOptional()
   @IsString()
   message?: string;
+
+  // Honeypot anti-bots: campo invisible para personas, que el frontend nunca
+  // completa. Si llega con contenido, quien envió el formulario es un bot
+  // (los humanos no lo ven ni lo pueden tocar).
+  @IsOptional()
+  @IsString()
+  website?: string;
 }

@@ -16,9 +16,9 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 // Tamaño máximo aceptado para el archivo tal como lo sube el cliente (antes de
-// cualquier optimización). Suficiente para una foto sin comprimir de una
-// cámara o celular; evita que una subida enorme se cargue entera en memoria.
-const MAX_UPLOAD_SIZE_BYTES = 15 * 1024 * 1024;
+// cualquier optimización). Configurable vía MAX_UPLOAD_SIZE_BYTES (ver .env.example);
+// evita que una subida enorme se cargue entera en memoria.
+const MAX_UPLOAD_SIZE_BYTES = parseInt(process.env.MAX_UPLOAD_SIZE_BYTES ?? '6291456', 10);
 
 const imageFileFilter = (
   _req: unknown,

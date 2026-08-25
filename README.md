@@ -23,16 +23,61 @@ Repository: https://github.com/octaM3/distanterra-back
     delete (file + row removed together).
   - **Experiences** (title, optional location, dynamic rich description made of text
     and list blocks) — soft delete.
+  - **Gallery photos** (paginated public listing, display order) — hard delete (file
+    + row removed together), server-side optimized on upload (see below).
+- **Contact messages**: public form (footer + `/contacto`) posts to `POST /contact`,
+  no auth required. Admin panel lists them, marks as read (unread-count badge) and
+  deletes (hard delete, no soft-delete for this resource). Abuse protections on the
+  public endpoint:
+  - Dedicated rate limit, stricter than the global default: `CONTACT_THROTTLE_LIMIT`
+    submissions per `CONTACT_THROTTLE_TTL_SECONDS` per IP (default: **1 every 10 min**).
+  - Honeypot field (`website` in the DTO): invisible to real users in the frontend
+    form; if it comes back non-empty, the request is silently accepted (fake success
+    response) without touching the database, so bots don't learn they were caught.
+  - Per-email cooldown: a second message from the same email address (case-insensitive)
+    within `CONTACT_EMAIL_COOLDOWN_HOURS` (default: **24h**) is rejected with `429`.
 - Every admin-editable piece of content that has copy is **bilingual** (`_es` / `_en`
   columns), matching the frontend's i18n setup.
 - Uploaded images are stored on local disk (`UPLOADS_DIR`) and served statically at
   `/uploads/...`, which fits the "everything on one Hostinger VPS" deployment target.
+  Upload size is capped at `MAX_UPLOAD_SIZE_BYTES` (default **6MB**), enforced by
+  Multer on every image upload endpoint (comments, images/logos, gallery) — configurable
+  via `.env`, not hardcoded.
 - Gallery photos are optimized on upload with `sharp` (`common/utils/image-optimizer.util.ts`):
   resized to fit within 1920×1920 (aspect ratio preserved, never upscaled) and
   recompressed as WebP, so heavy camera-original photos never get served as-is.
-  SVG/GIF are stored untouched. Upload is capped at 15MB before optimization.
+  SVG/GIF are stored untouched. Comments and logos are stored as uploaded, without
+  this optimization pass.
 - Database schema is plain, versioned SQL files under [`sql/`](./sql), no ORM
   migrations magic — run once with `npm run db:init`.
+- **Mining logistics campaign management** (internal admin tool, no public endpoints):
+  - **Companies**: client companies for which campaigns are organized — soft delete.
+  - **Stock categories**: a small ABM (Carpas, Vehículos, Iluminación, Herramientas,
+    etc.) used to classify the stock catalog, referenced by FK (`category_id`) — no
+    free-text category field.
+  - **Stock catalog**: Distanterra's own equipment (tents, trucks, lights, specific
+    tools) with a total quantity, unit, and independent `price_per_day` /
+    `price_per_month` (a paid item can have one, the other, or both at once; neither
+    set means it's free, e.g. cutlery). Available quantity is computed on the fly
+    (total minus what's locked in non-finished campaigns), never stored.
+  - **Campaigns**: created for a company before they start (`start_date`/`end_date`).
+    Assigning stock to a campaign locks that quantity — it can't be assigned to another
+    campaign — until the campaign is manually finished (`POST .../finish`), which
+    releases everything at once. The end date can be extended while the campaign isn't
+    finished (`PUT .../extend`), which also appends an automatic entry to the activity
+    log. Status (`planificada` / `en_curso` / `finalizada`) is computed from the dates
+    and `finished_at`, never stored. Each stock assignment picks which billing basis
+    applies for that campaign (`per_day` / `per_month` / `none`) out of whatever the
+    catalog item has configured — that choice, not the catalog, drives the cost calc.
+  - **Extra expenses**: ad-hoc costs that come up during a campaign (e.g. a food run),
+    with an optional invoice photo upload, itemized and totaled per campaign and per
+    month.
+  - **Activity log**: free-text, dated entries admins add during a campaign to keep a
+    running log of what was coordinated/done.
+  - **Excel export** (`GET .../export`, via `exceljs`): one workbook per campaign with
+    a summary sheet, itemized assigned stock (cost included even when `none`-priced),
+    itemized extra expenses (with a per-month subtotal), and the activity log sorted
+    by date.
 
 ## Tech stack
 
@@ -43,6 +88,7 @@ Repository: https://github.com/octaM3/distanterra-back
 - `class-validator` / `class-transformer` for request validation.
 - `helmet`, `cookie-parser`, `@nestjs/throttler` for baseline security hardening.
 - `sharp` for server-side image resizing/compression (gallery uploads).
+- `exceljs` for generating per-campaign Excel reports.
 
 ## Project layout
 
@@ -58,8 +104,14 @@ distanterra-back/
 │   ├── comments/             # Testimonials ABM
 │   ├── images/               # Logos ABM
 │   ├── experiences/          # Experiences ABM
+│   ├── gallery/               # Gallery photos ABM (paginated public listing)
+│   ├── contact-messages/      # Public contact form + admin inbox
+│   ├── companies/             # Client companies ABM
+│   ├── stock-categories/      # Stock catalog categories ABM
+│   ├── stock-items/           # Equipment catalog ABM (with computed availability)
+│   ├── campaigns/             # Campaigns + stock assignment, expenses, activity log, Excel export
 │   ├── database/             # TypeORM entities + DatabaseModule
-│   ├── common/                # Shared utils (file upload, public URL builder)
+│   ├── common/                # Shared utils (file upload, image optimizer, public URL builder)
 │   ├── config/                # Env var loading + validation (Joi)
 │   ├── app.module.ts
 │   └── main.ts
@@ -95,6 +147,13 @@ Edit `.env` and fill in real values, especially:
 - `SEED_ADMIN_USERNAME` / `SEED_ADMIN_PASSWORD` — used only once, by the seed script.
 - `THROTTLE_LIMIT` / `THROTTLE_TTL_SECONDS` — global rate limit. If you get blocked
   while actively using the admin panel in local dev, raise `THROTTLE_LIMIT`.
+- `CONTACT_THROTTLE_LIMIT` / `CONTACT_THROTTLE_TTL_SECONDS` — rate limit specific to
+  `POST /contact` (default: 1 every 10 min per IP). Raise this if you're repeatedly
+  testing the contact form locally.
+- `CONTACT_EMAIL_COOLDOWN_HOURS` — how long before the same email can submit the
+  contact form again (default: 24h).
+- `MAX_UPLOAD_SIZE_BYTES` — max size accepted for any image upload (comments,
+  images/logos, gallery), default 6MB.
 
 ### 4. Create the database schema
 
@@ -181,6 +240,22 @@ All routes are prefixed with `/api`.
 | POST   | `/admin/experiences`               | JWT   | Create experience                      |
 | PUT    | `/admin/experiences/:id`           | JWT   | Update experience                      |
 | DELETE | `/admin/experiences/:id`           | JWT   | Soft-delete experience                |
+| POST   | `/contact`                        | none  | Submit contact form (rate-limited, honeypot, per-email cooldown — see Security notes) |
+| GET    | `/admin/contact-messages`          | JWT   | All contact messages, newest first (admin) |
+| GET    | `/admin/contact-messages/unread-count` | JWT | Unread count, for the admin panel badge |
+| PUT    | `/admin/contact-messages/:id/read` | JWT   | Mark a message as read                |
+| DELETE | `/admin/contact-messages/:id`      | JWT   | Delete a contact message (hard delete) |
+| GET/POST/PUT/DELETE | `/admin/companies[/:id]`  | JWT   | Client companies ABM (soft delete) |
+| GET/POST/PUT/DELETE | `/admin/stock-categories[/:id]` | JWT | Stock catalog categories ABM |
+| GET/POST/PUT/DELETE | `/admin/stock-items[/:id]` | JWT  | Equipment catalog ABM; list responses include computed `lockedQuantity`/`availableQuantity` |
+| GET/POST          | `/admin/campaigns`                | JWT   | List / create campaigns |
+| GET/PUT/DELETE     | `/admin/campaigns/:id`             | JWT   | Campaign detail (stock + expenses + activity log + totals) / update / soft-delete |
+| PUT    | `/admin/campaigns/:id/extend`      | JWT   | Extend the planned end date (also logs an activity entry) |
+| POST   | `/admin/campaigns/:id/finish`      | JWT   | Manually finish the campaign, releasing all assigned stock |
+| GET    | `/admin/campaigns/:id/export`      | JWT   | Download the campaign's Excel report (`.xlsx`) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/stock-items[/:itemId]` | JWT | Assign/update/release stock for the campaign (validated against availability) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/activity-logs[/:logId]` | JWT | Dated activity log entries |
 
 ### Bilingual content
 
@@ -236,5 +311,14 @@ the versions this project was developed and tested against:
   doesn't exist) to avoid leaking valid usernames via response timing.
 - Uploaded files are validated by MIME type and renamed to random UUIDs on disk —
   the original filename from the client is never trusted or persisted.
+- Uploaded files are capped at `MAX_UPLOAD_SIZE_BYTES` (default 6MB) by Multer,
+  rejected before the request body is fully read into memory.
 - All admin-only routes require a valid, non-expired JWT (1 hour lifetime); there is no
   refresh token mechanism, so after 1 hour the admin must log in again.
+- `POST /contact` (public, unauthenticated) has three layers against spam/abuse:
+  a dedicated rate limit (`CONTACT_THROTTLE_LIMIT`/`CONTACT_THROTTLE_TTL_SECONDS`,
+  read directly from `process.env` like the login throttle), a honeypot field
+  (`website`) that silently no-ops the request without persisting anything when
+  filled, and a per-email cooldown (`CONTACT_EMAIL_COOLDOWN_HOURS`) enforced in
+  `ContactMessagesService` via a case-insensitive lookup of the most recent message
+  from that email.

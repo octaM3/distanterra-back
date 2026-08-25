@@ -11,10 +11,17 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ContactMessage } from '@/database/entities/contact-message.entity';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { ContactMessagesService } from './contact-messages.service';
 import { CreateContactMessageDto } from './dto/create-contact-message.dto';
+
+// Límite estricto y propio para el formulario de contacto (independiente del límite
+// global por defecto en app.module.ts), para frenar el spam de envíos repetidos.
+const CONTACT_THROTTLE_LIMIT = parseInt(process.env.CONTACT_THROTTLE_LIMIT ?? '1', 10);
+const CONTACT_THROTTLE_TTL_MS =
+  parseInt(process.env.CONTACT_THROTTLE_TTL_SECONDS ?? '600', 10) * 1000;
 
 @Controller()
 export class ContactMessagesController {
@@ -26,7 +33,26 @@ export class ContactMessagesController {
 
   @Post('contact')
   @HttpCode(201)
+  @Throttle({ default: { limit: CONTACT_THROTTLE_LIMIT, ttl: CONTACT_THROTTLE_TTL_MS } })
   async create(@Body() dto: CreateContactMessageDto): Promise<ContactMessage> {
+    // Honeypot: campo invisible para humanos que solo un bot completaría.
+    // Se responde como si el envío hubiera sido exitoso, sin persistir nada
+    // ni delatar al bot que fue detectado.
+    if (dto.website) {
+      this.logger.warn(`POST /api/contact - honeypot activado, envío descartado (ip bot-like)`);
+      return {
+        id: 0,
+        name: dto.name,
+        company: dto.company,
+        phone: dto.phone ?? null,
+        email: dto.email,
+        message: dto.message ?? null,
+        isRead: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+
     this.logger.log(`POST /api/contact - "${dto.name}" (${dto.company})`);
     return this.contactMessagesService.create(dto);
   }
