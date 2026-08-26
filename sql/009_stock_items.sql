@@ -14,7 +14,6 @@ CREATE TABLE stock_items (
     id               SERIAL PRIMARY KEY,
     name             VARCHAR(255) NOT NULL,
     category_id      INTEGER NOT NULL REFERENCES stock_categories(id) ON DELETE RESTRICT,
-    unit             VARCHAR(50) NOT NULL DEFAULT 'unidad',
     total_quantity   INTEGER NOT NULL DEFAULT 0,
     price_per_day    NUMERIC(12,2),
     price_per_month  NUMERIC(12,2),

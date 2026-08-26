@@ -114,7 +114,6 @@ export class CampaignsService {
         stockItemId: csi.stockItemId,
         stockItemName: csi.stockItem?.name ?? '',
         category: csi.stockItem?.category?.name ?? '',
-        unit: csi.stockItem?.unit ?? '',
         quantity: csi.quantity,
         pricingType: csi.pricingType,
         unitPrice: csi.unitPrice,

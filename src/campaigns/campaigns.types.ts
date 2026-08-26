@@ -19,7 +19,6 @@ export interface CampaignStockItemView {
   stockItemId: number;
   stockItemName: string;
   category: string;
-  unit: string;
   quantity: number;
   pricingType: StockPricingType;
   unitPrice: number;

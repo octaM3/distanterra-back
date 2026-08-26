@@ -28,9 +28,6 @@ export class StockItem {
   @JoinColumn({ name: 'category_id' })
   category: StockCategory;
 
-  @Column({ type: 'varchar', length: 50, default: 'unidad' })
-  unit: string;
-
   @Column({ type: 'int', name: 'total_quantity', default: 0 })
   totalQuantity: number;
 

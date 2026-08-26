@@ -11,7 +11,6 @@ export interface StockItemView {
   name: string;
   categoryId: number;
   categoryName: string;
-  unit: string;
   totalQuantity: number;
   pricePerDay: number | null;
   pricePerMonth: number | null;
@@ -65,7 +64,6 @@ export class StockItemsService {
       name: item.name,
       categoryId: item.categoryId,
       categoryName: item.category?.name ?? '',
-      unit: item.unit,
       totalQuantity: item.totalQuantity,
       pricePerDay: item.pricePerDay,
       pricePerMonth: item.pricePerMonth,
@@ -143,7 +141,6 @@ export class StockItemsService {
     const item = this.stockItemRepository.create({
       name: dto.name,
       categoryId: dto.categoryId,
-      unit: dto.unit,
       totalQuantity: dto.totalQuantity,
       pricePerDay: dto.pricePerDay ?? null,
       pricePerMonth: dto.pricePerMonth ?? null,

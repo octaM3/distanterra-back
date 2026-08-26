@@ -10,11 +10,6 @@ export class CreateStockItemDto {
   @IsInt()
   categoryId: number;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  unit?: string;
-
   @Type(() => Number)
   @IsInt()
   @Min(0)
