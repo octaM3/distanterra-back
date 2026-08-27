@@ -3,37 +3,26 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { decimalTransformer } from '../transformers/decimal.transformer';
-import { StockCategory } from './stock-category.entity';
 
-@Entity({ name: 'stock_items' })
-export class StockItem {
+@Entity({ name: 'vehicles' })
+export class Vehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
+  @Column({ type: 'varchar', length: 20, name: 'license_plate', unique: true })
+  licensePlate: string;
 
-  @Column({ type: 'int', name: 'category_id' })
-  categoryId: number;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description: string | null;
 
-  @ManyToOne(() => StockCategory, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'category_id' })
-  category: StockCategory;
-
-  @Column({ type: 'int', name: 'total_quantity', default: 0 })
-  totalQuantity: number;
-
-  // Ambos precios son independientes entre sí: un ítem pago puede tener uno,
-  // el otro, o los dos a la vez. Al asignarlo a una campaña puntual, el
-  // costo se calcula automáticamente combinando ambos (ver
-  // computeStockItemCost), salvo que se marque "sin costo". Sin ninguno de
-  // los dos precios cargados, el ítem es gratuito (ej. cubiertos).
+  // Independientes entre sí: un vehículo puede tener uno o los dos a la vez.
+  // Al asignarlo a una campaña puntual, el costo se calcula automáticamente
+  // combinando ambos (ver computeVehicleCost). No hay un precio de "campaña
+  // completa" aparte: para eso se asigna con duración "toda la expedición".
   @Column({
     type: 'numeric',
     precision: 12,

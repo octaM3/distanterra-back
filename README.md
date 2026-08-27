@@ -58,26 +58,77 @@ Repository: https://github.com/octaM3/distanterra-back
   - **Stock catalog**: Distanterra's own equipment (tents, trucks, lights, specific
     tools) with a total quantity, unit, and independent `price_per_day` /
     `price_per_month` (a paid item can have one, the other, or both at once; neither
-    set means it's free, e.g. cutlery). Available quantity is computed on the fly
-    (total minus what's locked in non-finished campaigns), never stored.
+    set means it's free, e.g. cutlery). Available quantity is computed on the fly,
+    never stored — see the locking model under Campaigns below, since what counts as
+    "locked" depends on whether a date range is given.
+  - **Vehicles**: rented from third parties for campaigns. Unlike the stock catalog,
+    each vehicle is a unique unit identified by `license_plate` (unique) — no quantity,
+    it's either assigned to a campaign or it isn't. Independent `price_per_day` /
+    `price_per_month` (a vehicle can have one or both). There's no separate "full
+    campaign" price: to charge for the whole campaign, assign the vehicle with the
+    assignment's date range equal to the campaign's own range (`start_date`/`end_date`)
+    — the cost calc (see below) is the same either way, it's just that the day count
+    happens to cover the entire campaign. Availability follows the same locking model
+    as stock (see Campaigns below): a vehicle is locked only for the date range(s) it's
+    actually assigned to, not for an entire campaign's lifetime. The catalog list/detail
+    (`isAvailable`/`lockedInCampaignName`) reflects usage **today** specifically — a
+    vehicle assigned to a campaign that hasn't started yet still shows as available,
+    with `nextUseDate`/`nextUseCampaignName` telling you when it's next due to be used
+    (`getUsageByVehicle` in `vehicles.service.ts`). This is separate from (and less
+    conservative than) the guard on deleting a vehicle, which still blocks on any
+    non-finished campaign assignment regardless of date.
   - **Campaigns**: created for a company before they start (`start_date`/`end_date`).
-    Assigning stock to a campaign locks that quantity — it can't be assigned to another
-    campaign — until the campaign is manually finished (`POST .../finish`), which
-    releases everything at once. The end date can be extended while the campaign isn't
+    Every assignment (stock or vehicle) carries its own `start_date`/`end_date`
+    (required, must fall within the campaign's own date range) — an item doesn't have
+    to be rented for the campaign's full duration, and the cost is computed from that
+    assignment's own day count, not the campaign's. **Locking is scoped to that same
+    date range, not to the campaign's lifetime**: assigning a tent for 10 of a
+    campaign's 40 days only blocks it for those 10 days — it can be assigned to a
+    different campaign for the other 30 (`getAvailableQuantity` in
+    `stock-items.service.ts` / `isAvailable` in `vehicles.service.ts`, both doing a
+    date-range overlap check against `campaign_stock_items`/`campaign_vehicles` rows
+    of campaigns that aren't finished nor soft-deleted, used when actually
+    saving an assignment). The catalog dropdown in the assignment modal never disables
+    an item/vehicle for being "in use elsewhere" — instead, once one is picked,
+    `GET /admin/stock-items/:id/schedule` / `GET /admin/vehicles/:id/schedule` return
+    its other current assignments (date ranges, quantity for stock) so the modal's
+    calendar can grey out the specific days that are already taken, letting the admin
+    pick free dates instead of being blocked outright. The plain `GET /admin/stock-items`
+    and `GET /admin/vehicles` list responses still report the conservative
+    "assigned to any non-finished campaign at all, regardless of dates" figure — used
+    by the standalone catalog pages and by the guards that block lowering a stock
+    item's `totalQuantity` or deleting an item/vehicle that's assigned anywhere. A
+    campaign being manually finished (`POST .../finish`) still releases everything at
+    once regardless of dates. The end date can be extended while the campaign isn't
     finished (`PUT .../extend`), which also appends an automatic entry to the activity
     log. Status (`planificada` / `en_curso` / `finalizada`) is computed from the dates
-    and `finished_at`, never stored. Each stock assignment picks which billing basis
-    applies for that campaign (`per_day` / `per_month` / `none`) out of whatever the
-    catalog item has configured — that choice, not the catalog, drives the cost calc.
+    and `finished_at`, never stored, and the detail response also returns the
+    campaign's total `durationDays` (inclusive day count). Every assignment (stock or
+    vehicle) also snapshots both `price_per_day` and `price_per_month` from the
+    catalog at assignment time (so later catalog price changes don't affect it).
+    **Cost is calculated automatically by default**: whole 30-day blocks are billed at
+    `price_per_month` and the leftover days at `price_per_day` (e.g. 40 days = 1 month
+    + 10 days); if only one of the two prices is loaded, that one is used alone
+    (rounding the day count up to a full month when only `price_per_month` is
+    available); with neither loaded the cost is 0 — see `computeBlendedUnitCost` /
+    `computeStockItemCost` / `computeVehicleCost` in `campaigns.util.ts`. Every
+    assignment also has an optional `manual_cost` (nullable numeric): when set, it
+    replaces the automatic calculation as the assignment's final `cost` outright — the
+    UI shows the automatic figure (and its day/month breakdown) as a recommendation,
+    not a constraint, and the admin can type any other total. Stock assignments
+    additionally support an explicit `no_cost` override (forces the cost to 0
+    regardless of `manual_cost` or the catalog prices, e.g. for items lent for free)
+    — `no_cost` always wins over `manual_cost` when both are set.
   - **Extra expenses**: ad-hoc costs that come up during a campaign (e.g. a food run),
     with an optional invoice photo upload, itemized and totaled per campaign and per
-    month.
+    month. Categorized by an optional `category_id` FK into the same `stock_categories`
+    catalog used by the stock module — no free-text category field.
   - **Activity log**: free-text, dated entries admins add during a campaign to keep a
     running log of what was coordinated/done.
   - **Excel export** (`GET .../export`, via `exceljs`): one workbook per campaign with
-    a summary sheet, itemized assigned stock (cost included even when `none`-priced),
-    itemized extra expenses (with a per-month subtotal), and the activity log sorted
-    by date.
+    a summary sheet, itemized assigned stock (cost included even when `no_cost`),
+    itemized assigned vehicles, itemized extra expenses (with a per-month subtotal),
+    and the activity log sorted by date.
 
 ## Tech stack
 
@@ -97,6 +148,7 @@ distanterra-back/
 ├── sql/                     # Raw SQL DDL, run in filename order
 ├── scripts/
 │   ├── init-db.ts           # Runs every sql/*.sql file against the configured DB
+│   ├── reset-db.ts          # Wipes and reinitializes the schema from scratch (--yes required)
 │   ├── seed-admin.ts        # Creates/updates the single admin account
 │   └── seed-experiences.ts  # One-off import of the original hardcoded experiences
 ├── src/
@@ -109,7 +161,8 @@ distanterra-back/
 │   ├── companies/             # Client companies ABM
 │   ├── stock-categories/      # Stock catalog categories ABM
 │   ├── stock-items/           # Equipment catalog ABM (with computed availability)
-│   ├── campaigns/             # Campaigns + stock assignment, expenses, activity log, Excel export
+│   ├── vehicles/               # Vehicle catalog ABM (unique per license plate, boolean availability)
+│   ├── campaigns/             # Campaigns + stock/vehicle assignment, expenses, activity log, Excel export
 │   ├── database/             # TypeORM entities + DatabaseModule
 │   ├── common/                # Shared utils (file upload, image optimizer, public URL builder)
 │   ├── config/                # Env var loading + validation (Joi)
@@ -165,7 +218,21 @@ npm run db:init
 ```
 
 This executes every file in [`sql/`](./sql) in order. It's idempotent (`CREATE ... IF
-NOT EXISTS`), so it's safe to run again after adding new `.sql` files.
+NOT EXISTS`), so it's safe to run again after adding new `.sql` files. Since it only
+ever creates, altering an existing table's columns (e.g. adding a new one) requires
+editing the relevant `sql/*.sql` file directly and either applying that change by hand
+on a database that already has the table, or wiping and reinitializing (see below) —
+there's no incremental migration step.
+
+To wipe every table and reinitialize the schema from scratch on the configured
+database (destructive — local/dev use only):
+
+```bash
+npm run db:reset -- --yes
+```
+
+Without `--yes` it only prints what it would do and touches nothing. Follow it with
+`npm run db:seed-admin` again, since resetting also deletes the admin account.
 
 ### 5. Create the admin account
 
@@ -247,14 +314,18 @@ All routes are prefixed with `/api`.
 | DELETE | `/admin/contact-messages/:id`      | JWT   | Delete a contact message (hard delete) |
 | GET/POST/PUT/DELETE | `/admin/companies[/:id]`  | JWT   | Client companies ABM (soft delete) |
 | GET/POST/PUT/DELETE | `/admin/stock-categories[/:id]` | JWT | Stock catalog categories ABM |
-| GET/POST/PUT/DELETE | `/admin/stock-items[/:id]` | JWT  | Equipment catalog ABM; list responses include computed `lockedQuantity`/`availableQuantity` |
+| GET/POST/PUT/DELETE | `/admin/stock-items[/:id]` | JWT  | Equipment catalog ABM; list responses include computed `lockedQuantity`/`availableQuantity` (conservative, ignores dates) |
+| GET    | `/admin/stock-items/:id/schedule` | JWT | This item's current assignments across all non-finished campaigns (`startDate`/`endDate`/`quantity`/`campaignName` each) — used to paint the assignment modal's calendar |
+| GET/POST/PUT/DELETE | `/admin/vehicles[/:id]` | JWT  | Vehicle catalog ABM; list responses include `isAvailable`/`lockedInCampaignId`/`lockedInCampaignName` (conservative, ignores dates) |
+| GET    | `/admin/vehicles/:id/schedule` | JWT | This vehicle's current assignments across all non-finished campaigns (`startDate`/`endDate`/`campaignName` each) — used to paint the assignment modal's calendar |
 | GET/POST          | `/admin/campaigns`                | JWT   | List / create campaigns |
-| GET/PUT/DELETE     | `/admin/campaigns/:id`             | JWT   | Campaign detail (stock + expenses + activity log + totals) / update / soft-delete |
+| GET/PUT/DELETE     | `/admin/campaigns/:id`             | JWT   | Campaign detail (stock + vehicles + expenses + activity log + totals) / update / soft-delete |
 | PUT    | `/admin/campaigns/:id/extend`      | JWT   | Extend the planned end date (also logs an activity entry) |
-| POST   | `/admin/campaigns/:id/finish`      | JWT   | Manually finish the campaign, releasing all assigned stock |
+| POST   | `/admin/campaigns/:id/finish`      | JWT   | Manually finish the campaign, releasing all assigned stock and vehicles |
 | GET    | `/admin/campaigns/:id/export`      | JWT   | Download the campaign's Excel report (`.xlsx`) |
-| POST/PUT/DELETE | `/admin/campaigns/:id/stock-items[/:itemId]` | JWT | Assign/update/release stock for the campaign (validated against availability) |
-| POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/stock-items[/:itemId]` | JWT | Assign/update/release stock for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/vehicles[/:vehicleAssignmentId]` | JWT | Assign/update/release a vehicle for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo, optional `categoryId`) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/activity-logs[/:logId]` | JWT | Dated activity log entries |
 
 ### Bilingual content

@@ -8,12 +8,13 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { CreateStockItemDto } from './dto/create-stock-item.dto';
 import { UpdateStockItemDto } from './dto/update-stock-item.dto';
-import { StockItemsService, StockItemView } from './stock-items.service';
+import { StockItemOccupiedRange, StockItemsService, StockItemView } from './stock-items.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('admin/stock-items')
@@ -26,6 +27,18 @@ export class StockItemsController {
   async findAll(): Promise<StockItemView[]> {
     this.logger.debug('GET /api/admin/stock-items');
     return this.stockItemsService.findAll();
+  }
+
+  @Get(':id/schedule')
+  async getSchedule(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('excludeCampaignStockItemId') excludeCampaignStockItemId?: string,
+  ): Promise<StockItemOccupiedRange[]> {
+    this.logger.debug(`GET /api/admin/stock-items/${id}/schedule`);
+    return this.stockItemsService.getSchedule(
+      id,
+      excludeCampaignStockItemId ? parseInt(excludeCampaignStockItemId, 10) : undefined,
+    );
   }
 
   @Post()

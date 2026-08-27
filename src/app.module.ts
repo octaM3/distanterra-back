@@ -12,6 +12,7 @@ import { CommentsModule } from './comments/comments.module';
 import { CompaniesModule } from './companies/companies.module';
 import { StockCategoriesModule } from './stock-categories/stock-categories.module';
 import { StockItemsModule } from './stock-items/stock-items.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { ImagesModule } from './images/images.module';
@@ -58,6 +59,7 @@ import { ExperiencesModule } from './experiences/experiences.module';
     CompaniesModule,
     StockCategoriesModule,
     StockItemsModule,
+    VehiclesModule,
     CampaignsModule,
   ],
   providers: [

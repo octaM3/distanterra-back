@@ -1,25 +1,6 @@
-import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDateString,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
-export class UpdateCampaignStockItemDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  quantity?: number;
-
-  @IsOptional()
-  @IsBoolean()
-  noCost?: boolean;
-
+export class UpdateCampaignVehicleDto {
   // undefined = no tocar; null = borrar el override y volver al cálculo
   // automático; number = fijarlo.
   @IsOptional()

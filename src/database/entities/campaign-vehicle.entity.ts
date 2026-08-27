@@ -10,10 +10,10 @@ import {
 } from 'typeorm';
 import { decimalTransformer } from '../transformers/decimal.transformer';
 import { Campaign } from './campaign.entity';
-import { StockItem } from './stock-item.entity';
+import { Vehicle } from './vehicle.entity';
 
-@Entity({ name: 'campaign_stock_items' })
-export class CampaignStockItem {
+@Entity({ name: 'campaign_vehicles' })
+export class CampaignVehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,24 +24,16 @@ export class CampaignStockItem {
   @JoinColumn({ name: 'campaign_id' })
   campaign: Campaign;
 
-  @Column({ type: 'int', name: 'stock_item_id' })
-  stockItemId: number;
+  @Column({ type: 'int', name: 'vehicle_id' })
+  vehicleId: number;
 
-  @ManyToOne(() => StockItem, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'stock_item_id' })
-  stockItem: StockItem;
-
-  @Column({ type: 'int' })
-  quantity: number;
-
-  // Sin costo: override explícito que ignora price_per_day/price_per_month
-  // y deja el costo en 0 (no es una modalidad de cobro).
-  @Column({ type: 'boolean', name: 'no_cost', default: false })
-  noCost: boolean;
+  @ManyToOne(() => Vehicle, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'vehicle_id' })
+  vehicle: Vehicle;
 
   // Snapshot de ambos precios del catálogo al momento de asignar, para no
-  // verse afectado por cambios de precio posteriores en stock_items. El
-  // costo combina los dos automáticamente (ver computeStockItemCost).
+  // verse afectado por cambios de precio posteriores en vehicles. El costo
+  // combina los dos automáticamente (ver computeVehicleCost).
   @Column({
     type: 'numeric',
     precision: 12,
@@ -63,7 +55,7 @@ export class CampaignStockItem {
   pricePerMonth: number | null;
 
   // Override manual del costo total: si no es null, reemplaza el cálculo
-  // automático (computeStockItemCost) como costo final de esta asignación.
+  // automático (computeVehicleCost) como costo final de esta asignación.
   @Column({
     type: 'numeric',
     precision: 12,
@@ -74,17 +66,17 @@ export class CampaignStockItem {
   })
   manualCost: number | null;
 
-  @Column({ type: 'text', nullable: true })
-  notes: string | null;
-
-  // Rango dentro de la campaña en el que se alquila este ítem puntual
-  // (puede ser menor a la duración completa de la campaña); se usa para
-  // calcular el costo real en vez de la duración completa de la campaña.
+  // Rango dentro de la campaña en el que se usa el vehículo (puede ser
+  // menor a la duración completa de la campaña); determina el costo real
+  // (ver computeVehicleCost).
   @Column({ type: 'date', name: 'start_date' })
   startDate: string;
 
   @Column({ type: 'date', name: 'end_date' })
   endDate: string;
+
+  @Column({ type: 'text', nullable: true })
+  notes: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

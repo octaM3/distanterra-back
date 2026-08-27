@@ -17,6 +17,7 @@
     "lint": "eslint \"{src,scripts}/**/*.ts\" --fix",
     "test": "jest",
     "db:init": "ts-node -r tsconfig-paths/register scripts/init-db.ts",
+    "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts",
     "db:seed-admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts",
     "db:seed-experiences": "ts-node -r tsconfig-paths/register scripts/seed-experiences.ts"
   },

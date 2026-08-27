@@ -1,4 +1,3 @@
-import { StockPricingType } from '@/database/entities/stock-item.entity';
 import { CampaignStatus } from './campaigns.util';
 
 export interface CampaignListItem {
@@ -20,8 +19,31 @@ export interface CampaignStockItemView {
   stockItemName: string;
   category: string;
   quantity: number;
-  pricingType: StockPricingType;
-  unitPrice: number;
+  noCost: boolean;
+  pricePerDay: number | null;
+  pricePerMonth: number | null;
+  manualCost: number | null;
+  recommendedCost: number;
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  cost: number;
+  notes: string | null;
+  createdAt: Date;
+}
+
+export interface CampaignVehicleView {
+  id: number;
+  vehicleId: number;
+  licensePlate: string;
+  vehicleDescription: string | null;
+  pricePerDay: number | null;
+  pricePerMonth: number | null;
+  manualCost: number | null;
+  recommendedCost: number;
+  startDate: string;
+  endDate: string;
+  durationDays: number;
   cost: number;
   notes: string | null;
   createdAt: Date;
@@ -30,6 +52,7 @@ export interface CampaignStockItemView {
 export interface CampaignExpenseView {
   id: number;
   description: string;
+  categoryId: number | null;
   category: string | null;
   amount: number;
   expenseDate: string;
@@ -52,8 +75,11 @@ export interface CampaignExpenseMonthSummary {
 
 export interface CampaignDetail extends CampaignListItem {
   description: string | null;
+  durationDays: number;
   stockItems: CampaignStockItemView[];
   stockItemsTotalCost: number;
+  vehicles: CampaignVehicleView[];
+  vehiclesTotalCost: number;
   expenses: CampaignExpenseView[];
   expensesTotal: number;
   expensesByMonth: CampaignExpenseMonthSummary[];

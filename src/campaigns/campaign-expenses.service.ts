@@ -4,6 +4,7 @@ import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { Repository } from 'typeorm';
 import { CampaignExpense } from '@/database/entities/campaign-expense.entity';
+import { StockCategoriesService } from '@/stock-categories/stock-categories.service';
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignExpenseDto } from './dto/create-campaign-expense.dto';
 import { UpdateCampaignExpenseDto } from './dto/update-campaign-expense.dto';
@@ -16,6 +17,7 @@ export class CampaignExpensesService {
     @InjectRepository(CampaignExpense)
     private readonly campaignExpenseRepository: Repository<CampaignExpense>,
     private readonly campaignsService: CampaignsService,
+    private readonly stockCategoriesService: StockCategoriesService,
   ) {}
 
   async findOneOrFail(campaignId: number, id: number): Promise<CampaignExpense> {
@@ -34,6 +36,7 @@ export class CampaignExpensesService {
     createdBy: number,
   ): Promise<CampaignExpense> {
     await this.campaignsService.assertCampaignEditable(campaignId);
+    if (dto.categoryId != null) await this.stockCategoriesService.findOneOrFail(dto.categoryId);
     this.logger.log(
       `Creando gasto para campaña ${campaignId}: "${dto.description}" ($${dto.amount})`,
     );
@@ -54,6 +57,7 @@ export class CampaignExpensesService {
   ): Promise<CampaignExpense> {
     await this.campaignsService.assertCampaignEditable(campaignId);
     const expense = await this.findOneOrFail(campaignId, id);
+    if (dto.categoryId != null) await this.stockCategoriesService.findOneOrFail(dto.categoryId);
 
     const previousInvoicePath = expense.invoiceImagePath;
     Object.assign(expense, dto);

@@ -4,7 +4,10 @@ CREATE TABLE IF NOT EXISTS campaign_expenses (
     id                  SERIAL PRIMARY KEY,
     campaign_id         INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     description         VARCHAR(255) NOT NULL,
-    category            VARCHAR(100),
+    -- Categoría del gasto, tomada del mismo catálogo que clasifica el stock
+    -- (stock_categories) para que el desplegable del formulario ofrezca
+    -- siempre valores consistentes en vez de texto libre. Opcional.
+    category_id         INTEGER REFERENCES stock_categories(id) ON DELETE SET NULL,
     amount              NUMERIC(12,2) NOT NULL,
     expense_date        DATE NOT NULL,
     invoice_image_path  VARCHAR(500),
@@ -17,5 +20,6 @@ CREATE TABLE IF NOT EXISTS campaign_expenses (
 
 CREATE INDEX IF NOT EXISTS idx_campaign_expenses_not_deleted ON campaign_expenses (deleted_at) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_campaign_expenses_campaign ON campaign_expenses (campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_expenses_category ON campaign_expenses (category_id);
 
 COMMENT ON TABLE campaign_expenses IS 'Gastos extra surgidos durante una campaña (ej. comida), con foto de factura opcional.';

@@ -1,8 +1,10 @@
 -- Campañas de logística minera organizadas para una empresa cliente.
 -- Se crean antes de iniciar (status calculado, no almacenado, en base a las
--- fechas y a finished_at). El stock asignado queda bloqueado desde que se
--- asigna hasta que la campaña se marca como finalizada manualmente
--- (ver campaign_stock_items en 010_campaign_stock_items.sql).
+-- fechas y a finished_at). El stock/vehículo asignado queda bloqueado solo
+-- durante su propia ventana de uso (start_date/end_date de la asignación,
+-- no toda la duración de la campaña) mientras la campaña no esté finalizada
+-- (ver campaign_stock_items en 011_campaign_stock_items.sql y
+-- campaign_vehicles en 015_campaign_vehicles.sql).
 CREATE TABLE IF NOT EXISTS campaigns (
     id             SERIAL PRIMARY KEY,
     company_id     INTEGER NOT NULL REFERENCES companies(id) ON DELETE RESTRICT,

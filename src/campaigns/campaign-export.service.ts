@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import ExcelJS from 'exceljs';
 import { CampaignsService } from './campaigns.service';
-import { campaignStatusLabel, pricingTypeLabel } from './campaigns.util';
+import { campaignStatusLabel } from './campaigns.util';
 
 const HEADER_FILL: ExcelJS.Fill = {
   type: 'pattern',
@@ -45,21 +45,23 @@ export class CampaignExportService {
       { label: 'Estado', value: campaignStatusLabel(detail.status) },
       { label: 'Fecha de inicio', value: detail.startDate },
       { label: 'Fecha de fin', value: detail.endDate },
+      { label: 'Duración', value: `${detail.durationDays} día(s)` },
       {
         label: 'Finalizada el',
         value: detail.finishedAt ? new Date(detail.finishedAt).toLocaleString('es-AR') : '-',
       },
       { label: '', value: '' },
       { label: 'Total stock asignado', value: detail.stockItemsTotalCost },
+      { label: 'Total vehículos asignados', value: detail.vehiclesTotalCost },
       { label: 'Total gastos extra', value: detail.expensesTotal },
       { label: 'TOTAL GENERAL', value: detail.grandTotal },
     ]);
     summarySheet.getColumn('value').numFmt = CURRENCY_FORMAT;
-    ['B9', 'B10', 'B11'].forEach((ref) => {
+    ['B10', 'B11', 'B12', 'B13'].forEach((ref) => {
       summarySheet.getCell(ref).numFmt = CURRENCY_FORMAT;
     });
     summarySheet.getRow(1).font = { bold: true };
-    summarySheet.getRow(11).font = { bold: true };
+    summarySheet.getRow(13).font = { bold: true };
 
     if (detail.expensesByMonth.length > 0) {
       summarySheet.addRow({});
@@ -79,8 +81,13 @@ export class CampaignExportService {
       { header: 'Ítem', key: 'name', width: 30 },
       { header: 'Categoría', key: 'category', width: 20 },
       { header: 'Cantidad', key: 'quantity', width: 12 },
-      { header: 'Tipo de precio', key: 'pricingType', width: 16 },
-      { header: 'Precio unitario', key: 'unitPrice', width: 16 },
+      { header: 'Desde', key: 'startDate', width: 14 },
+      { header: 'Hasta', key: 'endDate', width: 14 },
+      { header: 'Días', key: 'durationDays', width: 10 },
+      { header: 'Precio/día', key: 'pricePerDay', width: 14 },
+      { header: 'Precio/mes', key: 'pricePerMonth', width: 14 },
+      { header: 'Sin costo', key: 'noCost', width: 12 },
+      { header: 'Precio manual', key: 'manual', width: 14 },
       { header: 'Costo total', key: 'cost', width: 16 },
       { header: 'Notas', key: 'notes', width: 30 },
     ];
@@ -90,19 +97,64 @@ export class CampaignExportService {
         name: item.stockItemName,
         category: item.category,
         quantity: item.quantity,
-        pricingType: pricingTypeLabel(item.pricingType),
-        unitPrice: item.unitPrice,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        durationDays: item.durationDays,
+        pricePerDay: item.pricePerDay,
+        pricePerMonth: item.pricePerMonth,
+        noCost: item.noCost ? 'Sí' : 'No',
+        manual: item.manualCost != null ? 'Sí' : 'No',
         cost: item.cost,
         notes: item.notes ?? '',
       });
     }
-    stockSheet.getColumn('unitPrice').numFmt = CURRENCY_FORMAT;
+    stockSheet.getColumn('pricePerDay').numFmt = CURRENCY_FORMAT;
+    stockSheet.getColumn('pricePerMonth').numFmt = CURRENCY_FORMAT;
     stockSheet.getColumn('cost').numFmt = CURRENCY_FORMAT;
     const stockTotalRow = stockSheet.addRow({ name: 'TOTAL', cost: detail.stockItemsTotalCost });
     stockTotalRow.font = { bold: true };
     stockTotalRow.getCell('cost').numFmt = CURRENCY_FORMAT;
 
-    // ---- Hoja 3: Gastos extra ----
+    // ---- Hoja 3: Vehículos asignados ----
+    const vehiclesSheet = workbook.addWorksheet('Vehículos asignados');
+    vehiclesSheet.columns = [
+      { header: 'Patente', key: 'licensePlate', width: 14 },
+      { header: 'Descripción', key: 'description', width: 25 },
+      { header: 'Desde', key: 'startDate', width: 14 },
+      { header: 'Hasta', key: 'endDate', width: 14 },
+      { header: 'Días', key: 'durationDays', width: 10 },
+      { header: 'Precio/día', key: 'pricePerDay', width: 14 },
+      { header: 'Precio/mes', key: 'pricePerMonth', width: 14 },
+      { header: 'Precio manual', key: 'manual', width: 14 },
+      { header: 'Costo total', key: 'cost', width: 16 },
+      { header: 'Notas', key: 'notes', width: 30 },
+    ];
+    this.styleHeaderRow(vehiclesSheet.getRow(1));
+    for (const v of detail.vehicles) {
+      vehiclesSheet.addRow({
+        licensePlate: v.licensePlate,
+        description: v.vehicleDescription ?? '',
+        startDate: v.startDate,
+        endDate: v.endDate,
+        durationDays: v.durationDays,
+        pricePerDay: v.pricePerDay,
+        pricePerMonth: v.pricePerMonth,
+        manual: v.manualCost != null ? 'Sí' : 'No',
+        cost: v.cost,
+        notes: v.notes ?? '',
+      });
+    }
+    vehiclesSheet.getColumn('pricePerDay').numFmt = CURRENCY_FORMAT;
+    vehiclesSheet.getColumn('pricePerMonth').numFmt = CURRENCY_FORMAT;
+    vehiclesSheet.getColumn('cost').numFmt = CURRENCY_FORMAT;
+    const vehiclesTotalRow = vehiclesSheet.addRow({
+      licensePlate: 'TOTAL',
+      cost: detail.vehiclesTotalCost,
+    });
+    vehiclesTotalRow.font = { bold: true };
+    vehiclesTotalRow.getCell('cost').numFmt = CURRENCY_FORMAT;
+
+    // ---- Hoja 4: Gastos extra ----
     const expensesSheet = workbook.addWorksheet('Gastos extra');
     expensesSheet.columns = [
       { header: 'Fecha', key: 'date', width: 14 },
@@ -131,7 +183,7 @@ export class CampaignExportService {
     expensesTotalRow.font = { bold: true };
     expensesTotalRow.getCell('amount').numFmt = CURRENCY_FORMAT;
 
-    // ---- Hoja 4: Actividades (ordenadas por fecha) ----
+    // ---- Hoja 5: Actividades (ordenadas por fecha) ----
     const activitySheet = workbook.addWorksheet('Actividades');
     activitySheet.columns = [
       { header: 'Fecha', key: 'date', width: 14 },

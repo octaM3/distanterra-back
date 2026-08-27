@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
 import { StockCategory } from '@/database/entities/stock-category.entity';
 import { StockItem } from '@/database/entities/stock-item.entity';
 import { CreateStockItemDto } from './dto/create-stock-item.dto';
@@ -22,6 +23,15 @@ export interface StockItemView {
   availableQuantity: number;
 }
 
+/** Una asignación vigente de este ítem en otra (o la misma) campaña — usado para pintar el calendario del modal de asignación. */
+export interface StockItemOccupiedRange {
+  startDate: string;
+  endDate: string;
+  quantity: number;
+  campaignId: number;
+  campaignName: string;
+}
+
 @Injectable()
 export class StockItemsService {
   private readonly logger = new Logger(StockItemsService.name);
@@ -36,7 +46,11 @@ export class StockItemsService {
   /**
    * Cantidad bloqueada por ítem: suma de campaign_stock_items.quantity para
    * asignaciones vigentes (no eliminadas) en campañas no finalizadas (ni
-   * borradas). Se libera automáticamente al finalizar la campaña.
+   * borradas), sin importar sus fechas. Se libera automáticamente al
+   * finalizar la campaña. Usado para el catálogo general y como resguardo
+   * conservador al bajar `totalQuantity` o eliminar el ítem — para saber
+   * qué queda libre en una ventana de fechas puntual (al asignar a una
+   * campaña) ver getAvailableQuantity / getSchedule en su lugar.
    */
   private async getLockedQuantities(): Promise<Map<number, number>> {
     const rows = await this.stockItemRepository.manager
@@ -110,9 +124,17 @@ export class StockItemsService {
     return this.toView(item, locked);
   }
 
-  /** Cantidad disponible actual de un ítem puntual (usada al validar asignaciones a campañas). */
+  /**
+   * Cantidad disponible para una ventana de fechas puntual (usada al validar
+   * asignaciones a campañas): solo cuenta como "en uso" las asignaciones
+   * cuya propia startDate/endDate se superponen con `startDate`/`endDate`,
+   * no todas las asignaciones de la campaña en curso. Así el mismo ítem
+   * puede asignarse a otra campaña en los días en que no está en uso.
+   */
   async getAvailableQuantity(
     stockItemId: number,
+    startDate: string,
+    endDate: string,
     excludeCampaignStockItemId?: number,
   ): Promise<number> {
     const item = await this.findOneOrFail(stockItemId);
@@ -124,7 +146,9 @@ export class StockItemsService {
       .where('csi.stock_item_id = :stockItemId', { stockItemId })
       .andWhere('csi.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
-      .andWhere('c.finished_at IS NULL');
+      .andWhere('c.finished_at IS NULL')
+      .andWhere('csi.start_date <= :endDate', { endDate })
+      .andWhere('csi.end_date >= :startDate', { startDate });
 
     if (excludeCampaignStockItemId) {
       qb.andWhere('csi.id != :excludeId', { excludeId: excludeCampaignStockItemId });
@@ -133,6 +157,42 @@ export class StockItemsService {
     const result = await qb.getRawOne<{ locked: string }>();
     const locked = parseInt(result?.locked ?? '0', 10);
     return item.totalQuantity - locked;
+  }
+
+  /**
+   * Lista de asignaciones vigentes de este ítem en campañas no finalizadas
+   * (ni borradas), cada una con su propia ventana de fechas y cantidad —
+   * usado por el modal de asignación de una campaña para pintar en el
+   * calendario qué días están ocupados (y por cuánta cantidad) en vez de
+   * bloquear el ítem entero. `excludeCampaignStockItemId` permite ignorar
+   * la propia asignación al editarla.
+   */
+  async getSchedule(
+    stockItemId: number,
+    excludeCampaignStockItemId?: number,
+  ): Promise<StockItemOccupiedRange[]> {
+    await this.findOneOrFail(stockItemId);
+    const qb = this.stockItemRepository.manager
+      .createQueryBuilder(CampaignStockItem, 'csi')
+      .innerJoinAndSelect('csi.campaign', 'campaign')
+      .where('csi.stockItemId = :stockItemId', { stockItemId })
+      .andWhere('csi.deletedAt IS NULL')
+      .andWhere('campaign.deletedAt IS NULL')
+      .andWhere('campaign.finishedAt IS NULL')
+      .orderBy('csi.startDate', 'ASC');
+
+    if (excludeCampaignStockItemId) {
+      qb.andWhere('csi.id != :excludeId', { excludeId: excludeCampaignStockItemId });
+    }
+
+    const rows = await qb.getMany();
+    return rows.map((row) => ({
+      startDate: row.startDate,
+      endDate: row.endDate,
+      quantity: row.quantity,
+      campaignId: row.campaignId,
+      campaignName: row.campaign.name,
+    }));
   }
 
   async create(dto: CreateStockItemDto): Promise<StockItemView> {

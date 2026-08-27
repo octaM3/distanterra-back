@@ -6,6 +6,7 @@ import { Admin } from './entities/admin.entity';
 import { CampaignActivityLog } from './entities/campaign-activity-log.entity';
 import { CampaignExpense } from './entities/campaign-expense.entity';
 import { CampaignStockItem } from './entities/campaign-stock-item.entity';
+import { CampaignVehicle } from './entities/campaign-vehicle.entity';
 import { Campaign } from './entities/campaign.entity';
 import { Comment } from './entities/comment.entity';
 import { Company } from './entities/company.entity';
@@ -15,6 +16,7 @@ import { GalleryImage } from './entities/gallery-image.entity';
 import { Image } from './entities/image.entity';
 import { StockCategory } from './entities/stock-category.entity';
 import { StockItem } from './entities/stock-item.entity';
+import { Vehicle } from './entities/vehicle.entity';
 
 @Module({
   imports: [
@@ -39,8 +41,10 @@ import { StockItem } from './entities/stock-item.entity';
           Company,
           StockCategory,
           StockItem,
+          Vehicle,
           Campaign,
           CampaignStockItem,
+          CampaignVehicle,
           CampaignExpense,
           CampaignActivityLog,
         ],
@@ -59,8 +63,10 @@ import { StockItem } from './entities/stock-item.entity';
       Company,
       StockCategory,
       StockItem,
+      Vehicle,
       Campaign,
       CampaignStockItem,
+      CampaignVehicle,
       CampaignExpense,
       CampaignActivityLog,
     ]),

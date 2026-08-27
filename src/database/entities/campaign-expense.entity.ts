@@ -11,6 +11,7 @@ import {
 import { decimalTransformer } from '../transformers/decimal.transformer';
 import { Admin } from './admin.entity';
 import { Campaign } from './campaign.entity';
+import { StockCategory } from './stock-category.entity';
 
 @Entity({ name: 'campaign_expenses' })
 export class CampaignExpense {
@@ -27,8 +28,12 @@ export class CampaignExpense {
   @Column({ type: 'varchar', length: 255 })
   description: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  category: string | null;
+  @Column({ type: 'int', name: 'category_id', nullable: true })
+  categoryId: number | null;
+
+  @ManyToOne(() => StockCategory, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'category_id' })
+  category: StockCategory | null;
 
   @Column({ type: 'numeric', precision: 12, scale: 2, transformer: decimalTransformer })
   amount: number;

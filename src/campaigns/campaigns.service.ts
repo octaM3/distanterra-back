@@ -7,11 +7,13 @@ import { Campaign } from '@/database/entities/campaign.entity';
 import { CampaignActivityLog } from '@/database/entities/campaign-activity-log.entity';
 import { CampaignExpense } from '@/database/entities/campaign-expense.entity';
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
+import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
 import { toPublicFileUrl } from '@/common/utils/public-url.util';
 import { CampaignDetail, CampaignExpenseMonthSummary, CampaignListItem } from './campaigns.types';
 import {
   computeCampaignStatus,
   computeStockItemCost,
+  computeVehicleCost,
   daysBetweenInclusive,
   effectiveEndDate,
   monthKeyOf,
@@ -29,6 +31,8 @@ export class CampaignsService {
     private readonly campaignRepository: Repository<Campaign>,
     @InjectRepository(CampaignStockItem)
     private readonly campaignStockItemRepository: Repository<CampaignStockItem>,
+    @InjectRepository(CampaignVehicle)
+    private readonly campaignVehicleRepository: Repository<CampaignVehicle>,
     @InjectRepository(CampaignExpense)
     private readonly campaignExpenseRepository: Repository<CampaignExpense>,
     @InjectRepository(CampaignActivityLog)
@@ -87,15 +91,20 @@ export class CampaignsService {
     const campaign = await this.findCampaignEntityOrFail(id);
     const apiUrl = this.configService.get('apiUrl', { infer: true });
 
-    const [stockItems, expenses, activityLogs] = await Promise.all([
+    const [stockItems, vehicles, expenses, activityLogs] = await Promise.all([
       this.campaignStockItemRepository.find({
         where: { campaignId: id },
         relations: ['stockItem', 'stockItem.category'],
         order: { createdAt: 'ASC' },
       }),
+      this.campaignVehicleRepository.find({
+        where: { campaignId: id },
+        relations: ['vehicle'],
+        order: { createdAt: 'ASC' },
+      }),
       this.campaignExpenseRepository.find({
         where: { campaignId: id },
-        relations: ['createdByAdmin'],
+        relations: ['createdByAdmin', 'category'],
         order: { expenseDate: 'ASC' },
       }),
       this.campaignActivityLogRepository.find({
@@ -108,15 +117,31 @@ export class CampaignsService {
     const durationDays = daysBetweenInclusive(campaign.startDate, effectiveEndDate(campaign));
 
     const stockItemViews = stockItems.map((csi) => {
-      const cost = computeStockItemCost(csi.pricingType, csi.unitPrice, csi.quantity, durationDays);
+      const itemDurationDays = daysBetweenInclusive(csi.startDate, csi.endDate);
+      const recommendedCost = computeStockItemCost(
+        csi.noCost,
+        csi.pricePerDay,
+        csi.pricePerMonth,
+        csi.quantity,
+        itemDurationDays,
+      );
+      // El override manual gana sobre el cálculo automático, salvo "sin
+      // costo" (que siempre gana: no tiene sentido cobrar algo marcado gratis).
+      const cost = csi.noCost ? 0 : (csi.manualCost ?? recommendedCost);
       return {
         id: csi.id,
         stockItemId: csi.stockItemId,
         stockItemName: csi.stockItem?.name ?? '',
         category: csi.stockItem?.category?.name ?? '',
         quantity: csi.quantity,
-        pricingType: csi.pricingType,
-        unitPrice: csi.unitPrice,
+        noCost: csi.noCost,
+        pricePerDay: csi.pricePerDay,
+        pricePerMonth: csi.pricePerMonth,
+        manualCost: csi.manualCost,
+        recommendedCost,
+        startDate: csi.startDate,
+        endDate: csi.endDate,
+        durationDays: itemDurationDays,
         cost,
         notes: csi.notes,
         createdAt: csi.createdAt,
@@ -124,10 +149,38 @@ export class CampaignsService {
     });
     const stockItemsTotalCost = stockItemViews.reduce((sum, v) => sum + v.cost, 0);
 
+    const vehicleViews = vehicles.map((cv) => {
+      const itemDurationDays = daysBetweenInclusive(cv.startDate, cv.endDate);
+      const recommendedCost = computeVehicleCost(
+        cv.pricePerDay,
+        cv.pricePerMonth,
+        itemDurationDays,
+      );
+      const cost = cv.manualCost ?? recommendedCost;
+      return {
+        id: cv.id,
+        vehicleId: cv.vehicleId,
+        licensePlate: cv.vehicle?.licensePlate ?? '',
+        vehicleDescription: cv.vehicle?.description ?? null,
+        pricePerDay: cv.pricePerDay,
+        pricePerMonth: cv.pricePerMonth,
+        manualCost: cv.manualCost,
+        recommendedCost,
+        startDate: cv.startDate,
+        endDate: cv.endDate,
+        durationDays: itemDurationDays,
+        cost,
+        notes: cv.notes,
+        createdAt: cv.createdAt,
+      };
+    });
+    const vehiclesTotalCost = vehicleViews.reduce((sum, v) => sum + v.cost, 0);
+
     const expenseViews = expenses.map((e) => ({
       id: e.id,
       description: e.description,
-      category: e.category,
+      categoryId: e.categoryId,
+      category: e.category?.name ?? null,
       amount: e.amount,
       expenseDate: e.expenseDate,
       invoiceUrl: toPublicFileUrl(apiUrl, e.invoiceImagePath),
@@ -155,13 +208,16 @@ export class CampaignsService {
     return {
       ...this.toListItem(campaign),
       description: campaign.description,
+      durationDays,
       stockItems: stockItemViews,
       stockItemsTotalCost,
+      vehicles: vehicleViews,
+      vehiclesTotalCost,
       expenses: expenseViews,
       expensesTotal,
       expensesByMonth,
       activityLogs: activityLogViews,
-      grandTotal: stockItemsTotalCost + expensesTotal,
+      grandTotal: stockItemsTotalCost + vehiclesTotalCost + expensesTotal,
     };
   }
 
