@@ -13,6 +13,16 @@ import { Admin } from './admin.entity';
 import { Campaign } from './campaign.entity';
 import { StockCategory } from './stock-category.entity';
 
+export const INVOICE_TYPES = [
+  'Factura A',
+  'Factura B',
+  'Factura C',
+  'Factura E',
+  'Factura T',
+  'Factura M',
+] as const;
+export type InvoiceType = (typeof INVOICE_TYPES)[number];
+
 @Entity({ name: 'campaign_expenses' })
 export class CampaignExpense {
   @PrimaryGeneratedColumn()
@@ -43,6 +53,12 @@ export class CampaignExpense {
 
   @Column({ type: 'varchar', length: 500, name: 'invoice_image_path', nullable: true })
   invoiceImagePath: string | null;
+
+  @Column({ type: 'varchar', length: 20, name: 'invoice_type', nullable: true })
+  invoiceType: InvoiceType | null;
+
+  @Column({ type: 'varchar', length: 255, name: 'business_name', nullable: true })
+  businessName: string | null;
 
   @Column({ type: 'int', name: 'created_by', nullable: true })
   createdBy: number | null;

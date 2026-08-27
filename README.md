@@ -122,7 +122,10 @@ Repository: https://github.com/octaM3/distanterra-back
   - **Extra expenses**: ad-hoc costs that come up during a campaign (e.g. a food run),
     with an optional invoice photo upload, itemized and totaled per campaign and per
     month. Categorized by an optional `category_id` FK into the same `stock_categories`
-    catalog used by the stock module — no free-text category field.
+    catalog used by the stock module — no free-text category field. Also has two
+    optional invoice-detail fields: `invoice_type` (a fixed AFIP-letter catalog —
+    `Factura A/B/C/E/T/M`, enforced by a DB `CHECK` and `@IsIn` in the DTO, see
+    `INVOICE_TYPES` in `campaign-expense.entity.ts`) and `business_name` (free text).
   - **Activity log**: free-text, dated entries admins add during a campaign to keep a
     running log of what was coordinated/done.
   - **Excel export** (`GET .../export`, via `exceljs`): one workbook per campaign with
@@ -325,7 +328,7 @@ All routes are prefixed with `/api`.
 | GET    | `/admin/campaigns/:id/export`      | JWT   | Download the campaign's Excel report (`.xlsx`) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/stock-items[/:itemId]` | JWT | Assign/update/release stock for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/vehicles[/:vehicleAssignmentId]` | JWT | Assign/update/release a vehicle for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
-| POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo, optional `categoryId`) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo, `categoryId`, `invoiceType`, `businessName`) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/activity-logs[/:logId]` | JWT | Dated activity log entries |
 
 ### Bilingual content

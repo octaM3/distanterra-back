@@ -11,11 +11,19 @@ CREATE TABLE IF NOT EXISTS campaign_expenses (
     amount              NUMERIC(12,2) NOT NULL,
     expense_date        DATE NOT NULL,
     invoice_image_path  VARCHAR(500),
+    -- Datos de la factura, ambos opcionales y de texto libre salvo
+    -- invoice_type, que es un catálogo fijo (letra de factura AFIP).
+    invoice_type        VARCHAR(20),
+    business_name       VARCHAR(255),
     created_by          INTEGER REFERENCES admins(id) ON DELETE SET NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at          TIMESTAMPTZ,
-    CONSTRAINT chk_campaign_expenses_amount CHECK (amount >= 0)
+    CONSTRAINT chk_campaign_expenses_amount CHECK (amount >= 0),
+    CONSTRAINT chk_campaign_expenses_invoice_type CHECK (
+        invoice_type IS NULL
+        OR invoice_type IN ('Factura A', 'Factura B', 'Factura C', 'Factura E', 'Factura T', 'Factura M')
+    )
 );
 
 CREATE INDEX IF NOT EXISTS idx_campaign_expenses_not_deleted ON campaign_expenses (deleted_at) WHERE deleted_at IS NULL;

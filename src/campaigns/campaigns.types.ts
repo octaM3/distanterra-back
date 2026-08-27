@@ -1,3 +1,4 @@
+import { InvoiceType } from '@/database/entities/campaign-expense.entity';
 import { CampaignStatus } from './campaigns.util';
 
 export interface CampaignListItem {
@@ -57,6 +58,8 @@ export interface CampaignExpenseView {
   amount: number;
   expenseDate: string;
   invoiceUrl: string | null;
+  invoiceType: InvoiceType | null;
+  businessName: string | null;
   createdAt: Date;
 }
 

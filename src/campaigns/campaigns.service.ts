@@ -184,6 +184,8 @@ export class CampaignsService {
       amount: e.amount,
       expenseDate: e.expenseDate,
       invoiceUrl: toPublicFileUrl(apiUrl, e.invoiceImagePath),
+      invoiceType: e.invoiceType,
+      businessName: e.businessName,
       createdAt: e.createdAt,
     }));
     const expensesTotal = expenseViews.reduce((sum, v) => sum + v.amount, 0);

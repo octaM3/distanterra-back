@@ -162,6 +162,8 @@ export class CampaignExportService {
       { header: 'Descripción', key: 'description', width: 35 },
       { header: 'Categoría', key: 'category', width: 20 },
       { header: 'Monto', key: 'amount', width: 16 },
+      { header: 'Tipo de factura', key: 'invoiceType', width: 16 },
+      { header: 'Razón social', key: 'businessName', width: 25 },
       { header: 'Factura adjunta', key: 'hasInvoice', width: 16 },
     ];
     this.styleHeaderRow(expensesSheet.getRow(1));
@@ -172,6 +174,8 @@ export class CampaignExportService {
         description: e.description,
         category: e.category ?? '',
         amount: e.amount,
+        invoiceType: e.invoiceType ?? '',
+        businessName: e.businessName ?? '',
         hasInvoice: e.invoiceUrl ? 'Sí' : 'No',
       });
     }
