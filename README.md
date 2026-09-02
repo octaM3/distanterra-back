@@ -77,12 +77,40 @@ Repository: https://github.com/octaM3/distanterra-back
     (`getUsageByVehicle` in `vehicles.service.ts`). This is separate from (and less
     conservative than) the guard on deleting a vehicle, which still blocks on any
     non-finished campaign assignment regardless of date.
+  - **Pack animals** (`campaign_pack_animals`, "tracción a sangre" — horses, mules,
+    donkeys, etc.) — hired from third parties, not owned by Distanterra, and **not a
+    catalog at all**: there's no `pack_animals` table to manage separately. The
+    `animal_type` (free text, e.g. "Caballo", "Burro", "Mula"), `price_per_day` and
+    `tax_percentage` are typed directly into the assignment form when adding an animal
+    to a campaign, exactly like guides (see below) — there's no `/schedule` endpoint,
+    no overlap check against other campaigns, no quantity limit: an assignment is just
+    an `animal_type`, a `quantity` (>= 1, unbounded) and a date range within the
+    campaign. The cost formula and shape are identical to guides — reuses
+    `computeGuideCost` from `campaigns.util.ts` as-is: `quantity * price_per_day *
+    days * (1 + tax_percentage / 100)`, with an optional `manual_cost` override.
+  - **Guides** (`campaign_guides`, "baqueanos") — hired from third parties, not a
+    catalog at all: there's no list of individual guides to manage, nor any global
+    price/tax settings page. `price_per_day` and `tax_percentage` are typed directly
+    into the assignment form when adding guides to a campaign. Assigning guides to a
+    campaign (`campaign_guides`) is a `quantity` (>= 1) plus `price_per_day` /
+    `tax_percentage` (both optional) plus a `start_date`/`end_date` within the
+    campaign's own range (validated the same way as every other resource, via
+    `validateAssignmentDateRange`) — but unlike stock/vehicles, **that range only
+    feeds the cost formula, it doesn't gate availability** (no overlap/locking check):
+    `quantity * price_per_day * days * (1 + tax_percentage / 100)` (`computeGuideCost`
+    in `campaigns.util.ts`). An optional `manual_cost` still overrides that
+    calculation per assignment, same as every other resource type, for one-off
+    exceptions.
   - **Campaigns**: created for a company before they start (`start_date`/`end_date`).
-    Every assignment (stock or vehicle) carries its own `start_date`/`end_date`
-    (required, must fall within the campaign's own date range) — an item doesn't have
-    to be rented for the campaign's full duration, and the cost is computed from that
-    assignment's own day count, not the campaign's. **Locking is scoped to that same
-    date range, not to the campaign's lifetime**: assigning a tent for 10 of a
+    Every assignment of any resource type (stock, vehicle, pack animal, or guide)
+    carries its own `start_date`/`end_date` (required, must fall within the campaign's
+    own date range, validated by the shared `validateAssignmentDateRange` in
+    `campaigns.util.ts`) — an item doesn't have to be rented for the campaign's full
+    duration. For every resource type the cost is computed from that assignment's own
+    day count, not the campaign's. **Locking is scoped to that same date range, not to
+    the campaign's lifetime** (this applies to stock and vehicles only — pack animals
+    and guides have no locking at all, since they aren't a limited catalog):
+    assigning a tent for 10 of a
     campaign's 40 days only blocks it for those 10 days — it can be assigned to a
     different campaign for the other 30 (`getAvailableQuantity` in
     `stock-items.service.ts` / `isAvailable` in `vehicles.service.ts`, both doing a
@@ -103,22 +131,27 @@ Repository: https://github.com/octaM3/distanterra-back
     finished (`PUT .../extend`), which also appends an automatic entry to the activity
     log. Status (`planificada` / `en_curso` / `finalizada`) is computed from the dates
     and `finished_at`, never stored, and the detail response also returns the
-    campaign's total `durationDays` (inclusive day count). Every assignment (stock or
-    vehicle) also snapshots both `price_per_day` and `price_per_month` from the
-    catalog at assignment time (so later catalog price changes don't affect it).
-    **Cost is calculated automatically by default**: whole 30-day blocks are billed at
-    `price_per_month` and the leftover days at `price_per_day` (e.g. 40 days = 1 month
-    + 10 days); if only one of the two prices is loaded, that one is used alone
-    (rounding the day count up to a full month when only `price_per_month` is
-    available); with neither loaded the cost is 0 — see `computeBlendedUnitCost` /
-    `computeStockItemCost` / `computeVehicleCost` in `campaigns.util.ts`. Every
-    assignment also has an optional `manual_cost` (nullable numeric): when set, it
-    replaces the automatic calculation as the assignment's final `cost` outright — the
-    UI shows the automatic figure (and its day/month breakdown) as a recommendation,
-    not a constraint, and the admin can type any other total. Stock assignments
-    additionally support an explicit `no_cost` override (forces the cost to 0
-    regardless of `manual_cost` or the catalog prices, e.g. for items lent for free)
-    — `no_cost` always wins over `manual_cost` when both are set.
+    campaign's total `durationDays` (inclusive day count). Stock and vehicle
+    assignments snapshot both `price_per_day` and `price_per_month` from their
+    catalog at assignment time (so later catalog price changes don't affect it); pack
+    animal and guide assignments have no catalog to snapshot from — `price_per_day`
+    and `tax_percentage` are just whatever was typed into the form. **Cost is
+    calculated automatically by default**: for stock/vehicles, whole 30-day blocks
+    are billed at `price_per_month` and the leftover days at `price_per_day` (e.g. 40
+    days = 1 month + 10 days); if only one of the two prices is loaded, that one is
+    used alone (rounding the day count up to a full month when only `price_per_month`
+    is available); with neither loaded the cost is 0 — see `computeBlendedUnitCost` /
+    `computeStockItemCost` / `computeVehicleCost` in `campaigns.util.ts`. Pack animals
+    and guides use their own day-and-tax formula instead — see the Guides bullet
+    above (`computeGuideCost`). Every assignment (of any resource type) also has an
+    optional `manual_cost` (nullable numeric): when set, it replaces the automatic
+    calculation as the assignment's final `cost` outright — the UI shows the automatic
+    figure as a recommendation, not a constraint, and the admin can type any other
+    total. Stock assignments additionally support an explicit `no_cost` override
+    (forces the cost to 0 regardless of `manual_cost` or the catalog prices, e.g. for
+    items lent for free) — `no_cost` always wins over `manual_cost` when both are
+    set. Vehicles, pack animals and guides don't have `no_cost` (an assignment given
+    away for free is simpler to model as an empty `manual_cost` of `0`).
   - **Extra expenses**: ad-hoc costs that come up during a campaign (e.g. a food run),
     with an optional invoice photo upload, itemized and totaled per campaign and per
     month. Categorized by an optional `category_id` FK into the same `stock_categories`
@@ -130,8 +163,9 @@ Repository: https://github.com/octaM3/distanterra-back
     running log of what was coordinated/done.
   - **Excel export** (`GET .../export`, via `exceljs`): one workbook per campaign with
     a summary sheet, itemized assigned stock (cost included even when `no_cost`),
-    itemized assigned vehicles, itemized extra expenses (with a per-month subtotal),
-    and the activity log sorted by date.
+    itemized assigned vehicles, itemized assigned guides, itemized assigned pack
+    animals, itemized extra expenses (with a per-month subtotal), and the activity log
+    sorted by date.
 
 ## Tech stack
 
@@ -165,7 +199,7 @@ distanterra-back/
 │   ├── stock-categories/      # Stock catalog categories ABM
 │   ├── stock-items/           # Equipment catalog ABM (with computed availability)
 │   ├── vehicles/               # Vehicle catalog ABM (unique per license plate, boolean availability)
-│   ├── campaigns/             # Campaigns + stock/vehicle assignment, expenses, activity log, Excel export
+│   ├── campaigns/             # Campaigns + stock/vehicle/guide/pack-animal assignment (guides and pack animals have no catalog — price/type typed directly into the assignment form), expenses, activity log, Excel export
 │   ├── database/             # TypeORM entities + DatabaseModule
 │   ├── common/                # Shared utils (file upload, image optimizer, public URL builder)
 │   ├── config/                # Env var loading + validation (Joi)
@@ -322,12 +356,14 @@ All routes are prefixed with `/api`.
 | GET/POST/PUT/DELETE | `/admin/vehicles[/:id]` | JWT  | Vehicle catalog ABM; list responses include `isAvailable`/`lockedInCampaignId`/`lockedInCampaignName` (conservative, ignores dates) |
 | GET    | `/admin/vehicles/:id/schedule` | JWT | This vehicle's current assignments across all non-finished campaigns (`startDate`/`endDate`/`campaignName` each) — used to paint the assignment modal's calendar |
 | GET/POST          | `/admin/campaigns`                | JWT   | List / create campaigns |
-| GET/PUT/DELETE     | `/admin/campaigns/:id`             | JWT   | Campaign detail (stock + vehicles + expenses + activity log + totals) / update / soft-delete |
+| GET/PUT/DELETE     | `/admin/campaigns/:id`             | JWT   | Campaign detail (stock + vehicles + guides + pack animals + expenses + activity log + totals) / update / soft-delete |
 | PUT    | `/admin/campaigns/:id/extend`      | JWT   | Extend the planned end date (also logs an activity entry) |
-| POST   | `/admin/campaigns/:id/finish`      | JWT   | Manually finish the campaign, releasing all assigned stock and vehicles |
+| POST   | `/admin/campaigns/:id/finish`      | JWT   | Manually finish the campaign, releasing all assigned stock and vehicles (guides/pack animals were never locked, nothing to release) |
 | GET    | `/admin/campaigns/:id/export`      | JWT   | Download the campaign's Excel report (`.xlsx`) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/stock-items[/:itemId]` | JWT | Assign/update/release stock for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/vehicles[/:vehicleAssignmentId]` | JWT | Assign/update/release a vehicle for the campaign (validated against availability; requires `startDate`/`endDate` within the campaign's own range) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/guides[/:assignmentId]` | JWT | Add/update/remove a `quantity` of guides for the campaign; `pricePerDay`/`taxPercentage` are typed directly into the request (no catalog), `startDate`/`endDate` within the campaign's own range feed the cost formula (`computeGuideCost`, no availability check) |
+| POST/PUT/DELETE | `/admin/campaigns/:id/pack-animals[/:assignmentId]` | JWT | Assign/update/release a `quantity` of a pack animal for the campaign; `animalType`/`pricePerDay`/`taxPercentage` are typed directly into the request (no catalog, no availability check; requires `startDate`/`endDate` within the campaign's own range) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/expenses[/:expenseId]` | JWT | Extra expenses (multipart, optional `invoice` photo, `categoryId`, `invoiceType`, `businessName`) |
 | POST/PUT/DELETE | `/admin/campaigns/:id/activity-logs[/:logId]` | JWT | Dated activity log entries |
 

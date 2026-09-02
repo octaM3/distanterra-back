@@ -5,6 +5,8 @@ import { AppConfig } from '@/config/configuration';
 import { Admin } from './entities/admin.entity';
 import { CampaignActivityLog } from './entities/campaign-activity-log.entity';
 import { CampaignExpense } from './entities/campaign-expense.entity';
+import { CampaignGuide } from './entities/campaign-guide.entity';
+import { CampaignPackAnimal } from './entities/campaign-pack-animal.entity';
 import { CampaignStockItem } from './entities/campaign-stock-item.entity';
 import { CampaignVehicle } from './entities/campaign-vehicle.entity';
 import { Campaign } from './entities/campaign.entity';
@@ -45,6 +47,8 @@ import { Vehicle } from './entities/vehicle.entity';
           Campaign,
           CampaignStockItem,
           CampaignVehicle,
+          CampaignGuide,
+          CampaignPackAnimal,
           CampaignExpense,
           CampaignActivityLog,
         ],
@@ -67,6 +71,8 @@ import { Vehicle } from './entities/vehicle.entity';
       Campaign,
       CampaignStockItem,
       CampaignVehicle,
+      CampaignGuide,
+      CampaignPackAnimal,
       CampaignExpense,
       CampaignActivityLog,
     ]),

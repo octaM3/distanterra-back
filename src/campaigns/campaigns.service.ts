@@ -6,12 +6,15 @@ import { AppConfig } from '@/config/configuration';
 import { Campaign } from '@/database/entities/campaign.entity';
 import { CampaignActivityLog } from '@/database/entities/campaign-activity-log.entity';
 import { CampaignExpense } from '@/database/entities/campaign-expense.entity';
+import { CampaignGuide } from '@/database/entities/campaign-guide.entity';
+import { CampaignPackAnimal } from '@/database/entities/campaign-pack-animal.entity';
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
 import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
 import { toPublicFileUrl } from '@/common/utils/public-url.util';
 import { CampaignDetail, CampaignExpenseMonthSummary, CampaignListItem } from './campaigns.types';
 import {
   computeCampaignStatus,
+  computeGuideCost,
   computeStockItemCost,
   computeVehicleCost,
   daysBetweenInclusive,
@@ -33,6 +36,10 @@ export class CampaignsService {
     private readonly campaignStockItemRepository: Repository<CampaignStockItem>,
     @InjectRepository(CampaignVehicle)
     private readonly campaignVehicleRepository: Repository<CampaignVehicle>,
+    @InjectRepository(CampaignGuide)
+    private readonly campaignGuideRepository: Repository<CampaignGuide>,
+    @InjectRepository(CampaignPackAnimal)
+    private readonly campaignPackAnimalRepository: Repository<CampaignPackAnimal>,
     @InjectRepository(CampaignExpense)
     private readonly campaignExpenseRepository: Repository<CampaignExpense>,
     @InjectRepository(CampaignActivityLog)
@@ -91,7 +98,7 @@ export class CampaignsService {
     const campaign = await this.findCampaignEntityOrFail(id);
     const apiUrl = this.configService.get('apiUrl', { infer: true });
 
-    const [stockItems, vehicles, expenses, activityLogs] = await Promise.all([
+    const [stockItems, vehicles, guides, packAnimals, expenses, activityLogs] = await Promise.all([
       this.campaignStockItemRepository.find({
         where: { campaignId: id },
         relations: ['stockItem', 'stockItem.category'],
@@ -100,6 +107,14 @@ export class CampaignsService {
       this.campaignVehicleRepository.find({
         where: { campaignId: id },
         relations: ['vehicle'],
+        order: { createdAt: 'ASC' },
+      }),
+      this.campaignGuideRepository.find({
+        where: { campaignId: id },
+        order: { createdAt: 'ASC' },
+      }),
+      this.campaignPackAnimalRepository.find({
+        where: { campaignId: id },
         order: { createdAt: 'ASC' },
       }),
       this.campaignExpenseRepository.find({
@@ -176,6 +191,59 @@ export class CampaignsService {
     });
     const vehiclesTotalCost = vehicleViews.reduce((sum, v) => sum + v.cost, 0);
 
+    const guideViews = guides.map((cg) => {
+      const itemDurationDays = daysBetweenInclusive(cg.startDate, cg.endDate);
+      const recommendedCost = computeGuideCost(
+        cg.pricePerDay,
+        cg.taxPercentage,
+        cg.quantity,
+        itemDurationDays,
+      );
+      const cost = cg.manualCost ?? recommendedCost;
+      return {
+        id: cg.id,
+        quantity: cg.quantity,
+        pricePerDay: cg.pricePerDay,
+        taxPercentage: cg.taxPercentage,
+        manualCost: cg.manualCost,
+        recommendedCost,
+        cost,
+        notes: cg.notes,
+        startDate: cg.startDate,
+        endDate: cg.endDate,
+        durationDays: itemDurationDays,
+        createdAt: cg.createdAt,
+      };
+    });
+    const guidesTotalCost = guideViews.reduce((sum, v) => sum + v.cost, 0);
+
+    const packAnimalViews = packAnimals.map((cpa) => {
+      const itemDurationDays = daysBetweenInclusive(cpa.startDate, cpa.endDate);
+      const recommendedCost = computeGuideCost(
+        cpa.pricePerDay,
+        cpa.taxPercentage,
+        cpa.quantity,
+        itemDurationDays,
+      );
+      const cost = cpa.manualCost ?? recommendedCost;
+      return {
+        id: cpa.id,
+        animalType: cpa.animalType,
+        quantity: cpa.quantity,
+        pricePerDay: cpa.pricePerDay,
+        taxPercentage: cpa.taxPercentage,
+        manualCost: cpa.manualCost,
+        recommendedCost,
+        startDate: cpa.startDate,
+        endDate: cpa.endDate,
+        durationDays: itemDurationDays,
+        cost,
+        notes: cpa.notes,
+        createdAt: cpa.createdAt,
+      };
+    });
+    const packAnimalsTotalCost = packAnimalViews.reduce((sum, v) => sum + v.cost, 0);
+
     const expenseViews = expenses.map((e) => ({
       id: e.id,
       description: e.description,
@@ -215,11 +283,20 @@ export class CampaignsService {
       stockItemsTotalCost,
       vehicles: vehicleViews,
       vehiclesTotalCost,
+      guides: guideViews,
+      guidesTotalCost,
+      packAnimals: packAnimalViews,
+      packAnimalsTotalCost,
       expenses: expenseViews,
       expensesTotal,
       expensesByMonth,
       activityLogs: activityLogViews,
-      grandTotal: stockItemsTotalCost + vehiclesTotalCost + expensesTotal,
+      grandTotal:
+        stockItemsTotalCost +
+        vehiclesTotalCost +
+        guidesTotalCost +
+        packAnimalsTotalCost +
+        expensesTotal,
     };
   }
 

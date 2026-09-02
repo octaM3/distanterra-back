@@ -50,6 +50,42 @@ export interface CampaignVehicleView {
   createdAt: Date;
 }
 
+export interface CampaignGuideView {
+  id: number;
+  quantity: number;
+  // Cargado directamente en el formulario al agregar (ver computeGuideCost).
+  pricePerDay: number | null;
+  taxPercentage: number | null;
+  manualCost: number | null;
+  recommendedCost: number;
+  cost: number;
+  notes: string | null;
+  // Rango dentro de la campaña: determina la cantidad de días que se
+  // cobra (ver computeGuideCost).
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  createdAt: Date;
+}
+
+export interface CampaignPackAnimalView {
+  id: number;
+  animalType: string;
+  quantity: number;
+  // Cargado directamente en el formulario al asignar (ver computeGuideCost,
+  // misma fórmula que CampaignGuideView).
+  pricePerDay: number | null;
+  taxPercentage: number | null;
+  manualCost: number | null;
+  recommendedCost: number;
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  cost: number;
+  notes: string | null;
+  createdAt: Date;
+}
+
 export interface CampaignExpenseView {
   id: number;
   description: string;
@@ -83,6 +119,10 @@ export interface CampaignDetail extends CampaignListItem {
   stockItemsTotalCost: number;
   vehicles: CampaignVehicleView[];
   vehiclesTotalCost: number;
+  guides: CampaignGuideView[];
+  guidesTotalCost: number;
+  packAnimals: CampaignPackAnimalView[];
+  packAnimalsTotalCost: number;
   expenses: CampaignExpenseView[];
   expensesTotal: number;
   expensesByMonth: CampaignExpenseMonthSummary[];

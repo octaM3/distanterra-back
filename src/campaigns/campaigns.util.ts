@@ -91,6 +91,23 @@ export function computeVehicleCost(
 }
 
 /**
+ * Costo de los baqueanos agregados a una campaña: precio por día x
+ * cantidad de baqueanos x cantidad de días, con el % de impuestos
+ * aplicado encima. Sin precio cargado en guide_settings el costo es 0 (el
+ * admin puede usar manual_cost para esos casos).
+ */
+export function computeGuideCost(
+  pricePerDay: number | null,
+  taxPercentage: number | null,
+  quantity: number,
+  durationDays: number,
+): number {
+  if (pricePerDay == null) return 0;
+  const taxMultiplier = 1 + (taxPercentage ?? 0) / 100;
+  return pricePerDay * durationDays * taxMultiplier * quantity;
+}
+
+/**
  * Valida que el rango de una asignación (ítem de stock o vehículo) a una
  * campaña sea coherente (fin >= inicio) y caiga dentro de la duración de
  * esa campaña. Usado tanto por CampaignStockService como por
