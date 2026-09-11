@@ -45,8 +45,28 @@ export class CampaignExpense {
   @JoinColumn({ name: 'category_id' })
   category: StockCategory | null;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2, transformer: decimalTransformer })
-  amount: number;
+  // Monto opcional en cada moneda: un gasto puede cargarse en USD, en ARS, o
+  // en ambas (el service exige al menos una de las dos, ver
+  // CampaignExpensesService.create/update).
+  @Column({
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    name: 'amount_usd',
+    nullable: true,
+    transformer: decimalTransformer,
+  })
+  amountUsd: number | null;
+
+  @Column({
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    name: 'amount_ars',
+    nullable: true,
+    transformer: decimalTransformer,
+  })
+  amountArs: number | null;
 
   @Column({ type: 'date', name: 'expense_date' })
   expenseDate: string;
@@ -56,6 +76,11 @@ export class CampaignExpense {
 
   @Column({ type: 'varchar', length: 20, name: 'invoice_type', nullable: true })
   invoiceType: InvoiceType | null;
+
+  // Número/ID de factura tal como lo identifica el proveedor (texto libre;
+  // distinto de invoiceType, que es la letra de factura AFIP).
+  @Column({ type: 'varchar', length: 100, name: 'invoice_number', nullable: true })
+  invoiceNumber: string | null;
 
   @Column({ type: 'varchar', length: 255, name: 'business_name', nullable: true })
   businessName: string | null;

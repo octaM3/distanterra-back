@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
 import { StockCategory } from '@/database/entities/stock-category.entity';
 import { StockItem } from '@/database/entities/stock-item.entity';
+import { todayLocalDateString } from '@/common/utils/date.util';
 import { CreateStockItemDto } from './dto/create-stock-item.dto';
 import { UpdateStockItemDto } from './dto/update-stock-item.dto';
 
@@ -46,11 +47,12 @@ export class StockItemsService {
   /**
    * Cantidad bloqueada por ítem: suma de campaign_stock_items.quantity para
    * asignaciones vigentes (no eliminadas) en campañas no finalizadas (ni
-   * borradas), sin importar sus fechas. Se libera automáticamente al
-   * finalizar la campaña. Usado para el catálogo general y como resguardo
-   * conservador al bajar `totalQuantity` o eliminar el ítem — para saber
-   * qué queda libre en una ventana de fechas puntual (al asignar a una
-   * campaña) ver getAvailableQuantity / getSchedule en su lugar.
+   * borradas), sin importar sus fechas. Usado solo como resguardo
+   * conservador al bajar `totalQuantity` o eliminar el ítem (no se puede
+   * tocar mientras siga comprometido en alguna campaña activa, aunque su
+   * ventana ya haya pasado) — para lockedQuantity/availableQuantity del
+   * catálogo ver getLockedQuantitiesToday, y para una ventana de fechas
+   * puntual (al asignar a una campaña) ver getAvailableQuantity / getSchedule.
    */
   private async getLockedQuantities(): Promise<Map<number, number>> {
     const rows = await this.stockItemRepository.manager
@@ -62,6 +64,36 @@ export class StockItemsService {
       .where('csi.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .groupBy('csi.stock_item_id')
+      .getRawMany<{ stockItemId: number; locked: string }>();
+
+    const map = new Map<number, number>();
+    for (const row of rows) {
+      map.set(row.stockItemId, parseInt(row.locked, 10));
+    }
+    return map;
+  }
+
+  /**
+   * Cantidad realmente en uso HOY por ítem: igual que getLockedQuantities
+   * pero sólo cuenta asignaciones cuyo start_date/end_date cubren la fecha
+   * de hoy. A diferencia de esa, una asignación cuya ventana ya terminó deja
+   * de contar aunque la campaña no se haya marcado como finalizada a mano.
+   * Usado para lockedQuantity/availableQuantity del catálogo general.
+   */
+  private async getLockedQuantitiesToday(): Promise<Map<number, number>> {
+    const today = todayLocalDateString();
+    const rows = await this.stockItemRepository.manager
+      .createQueryBuilder()
+      .select('csi.stock_item_id', 'stockItemId')
+      .addSelect('SUM(csi.quantity)', 'locked')
+      .from('campaign_stock_items', 'csi')
+      .innerJoin('campaigns', 'c', 'c.id = csi.campaign_id')
+      .where('csi.deleted_at IS NULL')
+      .andWhere('c.deleted_at IS NULL')
+      .andWhere('c.finished_at IS NULL')
+      .andWhere('csi.start_date <= :today', { today })
+      .andWhere('csi.end_date >= :today', { today })
       .groupBy('csi.stock_item_id')
       .getRawMany<{ stockItemId: number; locked: string }>();
 
@@ -93,7 +125,7 @@ export class StockItemsService {
   async findAll(): Promise<StockItemView[]> {
     this.logger.debug('Obteniendo todos los ítems de stock');
     const items = await this.stockItemRepository.find({ relations: ['category'] });
-    const locked = await this.getLockedQuantities();
+    const locked = await this.getLockedQuantitiesToday();
     return items
       .map((item) => this.toView(item, locked.get(item.id) ?? 0))
       .sort((a, b) => a.categoryName.localeCompare(b.categoryName) || a.name.localeCompare(b.name));
@@ -120,7 +152,7 @@ export class StockItemsService {
     if (!item) {
       throw new NotFoundException(`Ítem de stock ${id} no encontrado`);
     }
-    const locked = (await this.getLockedQuantities()).get(id) ?? 0;
+    const locked = (await this.getLockedQuantitiesToday()).get(id) ?? 0;
     return this.toView(item, locked);
   }
 

@@ -37,8 +37,11 @@ export class CampaignExpensesService {
   ): Promise<CampaignExpense> {
     await this.campaignsService.assertCampaignEditable(campaignId);
     if (dto.categoryId != null) await this.stockCategoriesService.findOneOrFail(dto.categoryId);
+    if (dto.amountUsd == null && dto.amountArs == null) {
+      throw new BadRequestException('Debe cargar un monto en dólares o en pesos.');
+    }
     this.logger.log(
-      `Creando gasto para campaña ${campaignId}: "${dto.description}" ($${dto.amount})`,
+      `Creando gasto para campaña ${campaignId}: "${dto.description}" (USD ${dto.amountUsd ?? '-'} / ARS ${dto.amountArs ?? '-'})`,
     );
     const expense = this.campaignExpenseRepository.create({
       ...dto,
@@ -62,6 +65,10 @@ export class CampaignExpensesService {
     const previousInvoicePath = expense.invoiceImagePath;
     Object.assign(expense, dto);
     if (invoiceImagePath !== undefined) expense.invoiceImagePath = invoiceImagePath;
+
+    if (expense.amountUsd == null && expense.amountArs == null) {
+      throw new BadRequestException('Debe cargar un monto en dólares o en pesos.');
+    }
 
     this.logger.log(`Actualizando gasto de campaña id=${id}`);
     const saved = await this.campaignExpenseRepository.save(expense);

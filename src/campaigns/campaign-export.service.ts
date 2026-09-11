@@ -234,7 +234,9 @@ export class CampaignExportService {
       { header: 'Mes', key: 'month', width: 10 },
       { header: 'Descripción', key: 'description', width: 35 },
       { header: 'Categoría', key: 'category', width: 20 },
-      { header: 'Monto', key: 'amount', width: 16 },
+      { header: 'Monto USD', key: 'amountUsd', width: 14 },
+      { header: 'Monto ARS', key: 'amountArs', width: 14 },
+      { header: 'N° de factura', key: 'invoiceNumber', width: 18 },
       { header: 'Tipo de factura', key: 'invoiceType', width: 16 },
       { header: 'Razón social', key: 'businessName', width: 25 },
       { header: 'Factura adjunta', key: 'hasInvoice', width: 16 },
@@ -246,19 +248,24 @@ export class CampaignExportService {
         month: e.expenseDate.slice(0, 7),
         description: e.description,
         category: e.category ?? '',
-        amount: e.amount,
+        amountUsd: e.amountUsd ?? '',
+        amountArs: e.amountArs ?? '',
+        invoiceNumber: e.invoiceNumber ?? '',
         invoiceType: e.invoiceType ?? '',
         businessName: e.businessName ?? '',
         hasInvoice: e.invoiceUrl ? 'Sí' : 'No',
       });
     }
-    expensesSheet.getColumn('amount').numFmt = CURRENCY_FORMAT;
+    expensesSheet.getColumn('amountUsd').numFmt = CURRENCY_FORMAT;
+    expensesSheet.getColumn('amountArs').numFmt = CURRENCY_FORMAT;
     const expensesTotalRow = expensesSheet.addRow({
       description: 'TOTAL',
-      amount: detail.expensesTotal,
+      amountUsd: detail.expensesTotal,
+      amountArs: detail.expensesTotalArs,
     });
     expensesTotalRow.font = { bold: true };
-    expensesTotalRow.getCell('amount').numFmt = CURRENCY_FORMAT;
+    expensesTotalRow.getCell('amountUsd').numFmt = CURRENCY_FORMAT;
+    expensesTotalRow.getCell('amountArs').numFmt = CURRENCY_FORMAT;
 
     // ---- Hoja 7: Actividades (ordenadas por fecha) ----
     const activitySheet = workbook.addWorksheet('Actividades');

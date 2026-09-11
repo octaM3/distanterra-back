@@ -6,12 +6,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+// "otro" es la categoría catch-all para puntos que no encajan en las demás
+// (ver CATEGORY_LABELS/CATEGORY_SVG_PATHS en categoryIcons.ts del front).
 export const CATEGORIAS_PUNTO_INTERES = [
-  'refugio',
-  'mirador',
-  'agua',
-  'peligro',
+  'hospital',
+  'gendarmeria',
   'campamento',
+  'baqueano',
+  'restaurante',
+  'alojamiento',
+  'otro',
 ] as const;
 export type CategoriaPuntoInteres = (typeof CATEGORIAS_PUNTO_INTERES)[number];
 
@@ -29,7 +33,6 @@ export class PuntoInteres {
   @Column({ type: 'text', nullable: true })
   comentario: string | null;
 
-  // Define qué ícono se pinta en el mapa (ver categoryIcons.ts en el front).
   @Column({ type: 'varchar', length: 20 })
   categoria: CategoriaPuntoInteres;
 

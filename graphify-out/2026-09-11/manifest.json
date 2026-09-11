@@ -36,9 +36,9 @@
     "semantic_hash": "aa0e22487b7bd7612cf887e6dcda035b"
   },
   "src/app.module.ts": {
-    "mtime": 1789098603.9416072,
-    "seen": 1789099172.3764927,
-    "ast_hash": "469e91c89912f85f311365d9fa541d88",
+    "mtime": 1789152056.8344388,
+    "seen": 1789152210.2097738,
+    "ast_hash": "31e373922d87ad586897d87202fabd55",
     "semantic_hash": ""
   },
   "src/auth/auth.controller.ts": {
@@ -582,9 +582,9 @@
     "semantic_hash": ""
   },
   "src/stock-items/stock-items.service.ts": {
-    "mtime": 1787789003.4801154,
-    "seen": 1788330220.4269497,
-    "ast_hash": "6d1ddaee5f4e09bc681784c4aabd4248",
+    "mtime": 1789150883.0067716,
+    "seen": 1789150932.667024,
+    "ast_hash": "b0f81979a1f22790ea4052b64014f1ed",
     "semantic_hash": ""
   },
   "src/database/entities/stock-category.entity.ts": {
@@ -762,15 +762,15 @@
     "semantic_hash": ""
   },
   "src/database/entities/punto-interes.entity.ts": {
-    "mtime": 1789099039.8240764,
-    "seen": 1789099172.4002593,
-    "ast_hash": "fac36fe6ccfe3a464dc934ed1648e602",
+    "mtime": 1789150145.2205236,
+    "seen": 1789150270.1698663,
+    "ast_hash": "77f55e65049a8595dd2b45205ec3a7bd",
     "semantic_hash": ""
   },
   "src/puntos-interes/dto/create-punto-interes.dto.ts": {
-    "mtime": 1789099039.8240764,
-    "seen": 1789099172.4063091,
-    "ast_hash": "c54a80bab820184276dc6478501429c2",
+    "mtime": 1789150162.572757,
+    "seen": 1789150270.1740248,
+    "ast_hash": "3bfd1a1d961f9de81ea4160bd798aec7",
     "semantic_hash": ""
   },
   "src/puntos-interes/dto/update-punto-interes.dto.ts": {
@@ -792,9 +792,15 @@
     "semantic_hash": ""
   },
   "src/puntos-interes/puntos-interes.service.ts": {
-    "mtime": 1789098585.041417,
-    "seen": 1789099172.4063156,
-    "ast_hash": "9100db999a340f73d613cbf2c7a8e348",
+    "mtime": 1789102907.4540987,
+    "seen": 1789103175.7500684,
+    "ast_hash": "495b156c0a4acda7629f389d1476558f",
+    "semantic_hash": ""
+  },
+  "src/common/guards/friendly-throttler.guard.ts": {
+    "mtime": 1789152096.6851726,
+    "seen": 1789152210.2184615,
+    "ast_hash": "3028daf0d6ae6b5cbcbd34a5eb3159e5",
     "semantic_hash": ""
   }
 }

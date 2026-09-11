@@ -249,19 +249,24 @@ export class CampaignsService {
       description: e.description,
       categoryId: e.categoryId,
       category: e.category?.name ?? null,
-      amount: e.amount,
+      amountUsd: e.amountUsd,
+      amountArs: e.amountArs,
       expenseDate: e.expenseDate,
       invoiceUrl: toPublicFileUrl(apiUrl, e.invoiceImagePath),
       invoiceType: e.invoiceType,
+      invoiceNumber: e.invoiceNumber,
       businessName: e.businessName,
       createdAt: e.createdAt,
     }));
-    const expensesTotal = expenseViews.reduce((sum, v) => sum + v.amount, 0);
+    const expensesTotal = expenseViews.reduce((sum, v) => sum + (v.amountUsd ?? 0), 0);
+    const expensesTotalArs = expenseViews.reduce((sum, v) => sum + (v.amountArs ?? 0), 0);
 
+    // Solo USD entra en el desglose por mes: es la moneda de grandTotal, y no
+    // hay tasa de cambio para combinarla con los gastos cargados en ARS.
     const byMonthMap = new Map<string, number>();
     for (const e of expenseViews) {
       const key = monthKeyOf(e.expenseDate);
-      byMonthMap.set(key, (byMonthMap.get(key) ?? 0) + e.amount);
+      byMonthMap.set(key, (byMonthMap.get(key) ?? 0) + (e.amountUsd ?? 0));
     }
     const expensesByMonth: CampaignExpenseMonthSummary[] = Array.from(byMonthMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
@@ -289,6 +294,7 @@ export class CampaignsService {
       packAnimalsTotalCost,
       expenses: expenseViews,
       expensesTotal,
+      expensesTotalArs,
       expensesByMonth,
       activityLogs: activityLogViews,
       grandTotal:

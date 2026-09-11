@@ -91,10 +91,12 @@ export interface CampaignExpenseView {
   description: string;
   categoryId: number | null;
   category: string | null;
-  amount: number;
+  amountUsd: number | null;
+  amountArs: number | null;
   expenseDate: string;
   invoiceUrl: string | null;
   invoiceType: InvoiceType | null;
+  invoiceNumber: string | null;
   businessName: string | null;
   createdAt: Date;
 }
@@ -124,7 +126,11 @@ export interface CampaignDetail extends CampaignListItem {
   packAnimals: CampaignPackAnimalView[];
   packAnimalsTotalCost: number;
   expenses: CampaignExpenseView[];
+  // Suma de amountUsd (USD) — la que entra en grandTotal, junto al resto de
+  // los costos de la campaña, todos en USD. amountArs se reporta aparte, sin
+  // mezclarlo en ningún total: no hay una tasa de cambio para combinarlos.
   expensesTotal: number;
+  expensesTotalArs: number;
   expensesByMonth: CampaignExpenseMonthSummary[];
   activityLogs: CampaignActivityLogView[];
   grandTotal: number;
