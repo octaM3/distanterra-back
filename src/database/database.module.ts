@@ -16,6 +16,7 @@ import { ContactMessage } from './entities/contact-message.entity';
 import { Experience } from './entities/experience.entity';
 import { GalleryImage } from './entities/gallery-image.entity';
 import { Image } from './entities/image.entity';
+import { PuntoInteres } from './entities/punto-interes.entity';
 import { StockCategory } from './entities/stock-category.entity';
 import { StockItem } from './entities/stock-item.entity';
 import { Vehicle } from './entities/vehicle.entity';
@@ -51,6 +52,7 @@ import { Vehicle } from './entities/vehicle.entity';
           CampaignPackAnimal,
           CampaignExpense,
           CampaignActivityLog,
+          PuntoInteres,
         ],
         // El esquema se gestiona manualmente con los archivos de la carpeta sql/, nunca con sincronización automática.
         synchronize: false,
@@ -75,6 +77,7 @@ import { Vehicle } from './entities/vehicle.entity';
       CampaignPackAnimal,
       CampaignExpense,
       CampaignActivityLog,
+      PuntoInteres,
     ]),
   ],
   exports: [TypeOrmModule],

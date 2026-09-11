@@ -18,7 +18,7 @@
   "16": "helmet",
   "17": "joi",
   "18": "Distanterra API",
-  "19": "class-validator",
+  "19": "@nestjs/config",
   "20": "@nestjs/core",
   "21": "@nestjs/jwt",
   "22": "@nestjs/mapped-types",

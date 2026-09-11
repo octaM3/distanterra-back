@@ -18,6 +18,7 @@ import { ContactMessagesModule } from './contact-messages/contact-messages.modul
 import { ImagesModule } from './images/images.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { ExperiencesModule } from './experiences/experiences.module';
+import { PuntosInteresModule } from './puntos-interes/puntos-interes.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ExperiencesModule } from './experiences/experiences.module';
     StockItemsModule,
     VehiclesModule,
     CampaignsModule,
+    PuntosInteresModule,
   ],
   providers: [
     {

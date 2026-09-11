@@ -166,6 +166,17 @@ Repository: https://github.com/octaM3/distanterra-back
     itemized assigned vehicles, itemized assigned guides, itemized assigned pack
     animals, itemized extra expenses (with a per-month subtotal), and the activity log
     sorted by date.
+- **Points of interest** (`puntos_interes`, internal admin tool, no public endpoints):
+  CRUD for markers on the frontend's interactive mountain map (`admin/puntos-interes`,
+  all endpoints behind `JwtAuthGuard`). Each point has a `nombre`, optional `telefono`
+  and `comentario` (free text), a `categoria` (`refugio` / `mirador` / `agua` /
+  `peligro` / `campamento` — fixed catalog, enforced by a DB `CHECK` and `@IsIn` in the
+  DTO, see `CATEGORIAS_PUNTO_INTERES` in `punto-interes.entity.ts`) that picks which
+  icon the frontend renders, and `latitude`/`longitude` (validated with `@IsLatitude`/
+  `@IsLongitude`). `GET /admin/puntos-interes` returns the full list for painting
+  markers; the frontend fetches per-point detail (`telefono`/`comentario`) lazily on
+  `GET /admin/puntos-interes/:id` only when a marker's popup is opened. Hard delete
+  (no soft-delete: a removed point is just gone, no audit trail needed for this data).
 
 ## Tech stack
 
@@ -200,6 +211,7 @@ distanterra-back/
 │   ├── stock-items/           # Equipment catalog ABM (with computed availability)
 │   ├── vehicles/               # Vehicle catalog ABM (unique per license plate, boolean availability)
 │   ├── campaigns/             # Campaigns + stock/vehicle/guide/pack-animal assignment (guides and pack animals have no catalog — price/type typed directly into the assignment form), expenses, activity log, Excel export
+│   ├── puntos-interes/        # Points of interest ABM for the frontend's mountain map
 │   ├── database/             # TypeORM entities + DatabaseModule
 │   ├── common/                # Shared utils (file upload, image optimizer, public URL builder)
 │   ├── config/                # Env var loading + validation (Joi)

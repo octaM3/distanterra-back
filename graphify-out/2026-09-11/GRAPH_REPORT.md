@@ -1,7 +1,7 @@
 # Graph Report - distanterra-back  (2026-09-11)
 
 ## Corpus Check
-- 154 files · ~32,766 words
+- 153 files · ~32,625 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -34,7 +34,7 @@
 - helmet
 - joi
 - Distanterra API
-- class-validator
+- @nestjs/config
 - @nestjs/core
 - @nestjs/jwt
 - @nestjs/mapped-types
@@ -169,7 +169,7 @@ Nodes (9): dist, node_modules, scripts, **/*spec.ts, sql, test, ./tsconfig.json,
 
 ### Community 10 - "dependencies"
 Cohesion: 0.29
-Nodes (7): bcrypt, @nestjs/config, dependencies, bcrypt, @nestjs/config, typeorm, typeorm
+Nodes (7): bcrypt, class-validator, dependencies, bcrypt, class-validator, typeorm, typeorm
 
 ### Community 11 - "seed-experiences.ts"
 Cohesion: 0.29
