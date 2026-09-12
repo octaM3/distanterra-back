@@ -1,7 +1,7 @@
 # Graph Report - distanterra-back  (2026-09-11)
 
 ## Corpus Check
-- 158 files · ~33,701 words
+- 158 files · ~33,787 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0327e6fd`
+- Built from commit: `9671dbd1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -30,7 +30,7 @@
 - nest-cli.json
 - StockCategory
 - cookie-parser
-- dotenv
+- reflect-metadata
 - helmet
 - joi
 - Distanterra API
@@ -170,7 +170,7 @@ Nodes (9): dist, node_modules, scripts, **/*spec.ts, sql, test, ./tsconfig.json,
 
 ### Community 10 - "dependencies"
 Cohesion: 0.29
-Nodes (7): bcrypt, dependencies, bcrypt, reflect-metadata, typeorm, reflect-metadata, typeorm
+Nodes (7): bcrypt, dotenv, dependencies, bcrypt, dotenv, typeorm, typeorm
 
 ### Community 11 - "seed-experiences.ts"
 Cohesion: 0.29

@@ -30,7 +30,7 @@
   "28": "passport",
   "29": "passport-jwt",
   "30": "pg",
-  "31": "reflect-metadata",
+  "31": "class-validator",
   "32": "rxjs",
   "33": "CampaignsService",
   "34": "uuid",

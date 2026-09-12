@@ -19,6 +19,7 @@ import { Image } from './entities/image.entity';
 import { PuntoInteres } from './entities/punto-interes.entity';
 import { StockCategory } from './entities/stock-category.entity';
 import { StockItem } from './entities/stock-item.entity';
+import { Tracking } from './entities/tracking.entity';
 import { Vehicle } from './entities/vehicle.entity';
 
 @Module({
@@ -53,6 +54,7 @@ import { Vehicle } from './entities/vehicle.entity';
           CampaignExpense,
           CampaignActivityLog,
           PuntoInteres,
+          Tracking,
         ],
         // El esquema se gestiona manualmente con los archivos de la carpeta sql/, nunca con sincronización automática.
         synchronize: false,
@@ -78,6 +80,7 @@ import { Vehicle } from './entities/vehicle.entity';
       CampaignExpense,
       CampaignActivityLog,
       PuntoInteres,
+      Tracking,
     ]),
   ],
   exports: [TypeOrmModule],

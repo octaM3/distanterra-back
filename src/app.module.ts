@@ -20,6 +20,7 @@ import { ImagesModule } from './images/images.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { ExperiencesModule } from './experiences/experiences.module';
 import { PuntosInteresModule } from './puntos-interes/puntos-interes.module';
+import { TrackingsModule } from './trackings/trackings.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { PuntosInteresModule } from './puntos-interes/puntos-interes.module';
     VehiclesModule,
     CampaignsModule,
     PuntosInteresModule,
+    TrackingsModule,
   ],
   providers: [
     {

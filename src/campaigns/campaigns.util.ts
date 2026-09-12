@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { toLocalDateString, todayLocalDateString } from '@/common/utils/date.util';
 
-export type CampaignStatus = 'planificada' | 'en_curso' | 'finalizada';
+export type CampaignStatus = 'planificada' | 'en_curso' | 'esperando_finalizacion' | 'finalizada';
 
 /**
  * El estado no se guarda en la base: se calcula a partir de las fechas y de
@@ -10,10 +10,23 @@ export type CampaignStatus = 'planificada' | 'en_curso' | 'finalizada';
  * negocio (ver todayLocalDateString), no UTC — si no, el estado se adelanta
  * un día durante la ventana en la que UTC ya cruzó la medianoche pero acá
  * todavía no.
+ *
+ * "esperando_finalizacion": ya pasó la fecha de fin pero nadie tocó
+ * "Finalizar" a mano todavía — antes esto se mostraba igual que "en_curso",
+ * lo que hacía parecer que el stock/vehículos seguían "en uso" en la
+ * campaña sin que quedara claro por qué (ver StockItemsService.
+ * getLockedQuantitiesToday, que sí libera por fecha aunque el estado de la
+ * campaña quede en este limbo).
  */
-export function computeCampaignStatus(startDate: string, finishedAt: Date | null): CampaignStatus {
+export function computeCampaignStatus(
+  startDate: string,
+  endDate: string,
+  finishedAt: Date | null,
+): CampaignStatus {
   if (finishedAt) return 'finalizada';
-  return todayLocalDateString() >= startDate ? 'en_curso' : 'planificada';
+  const today = todayLocalDateString();
+  if (today > endDate) return 'esperando_finalizacion';
+  return today >= startDate ? 'en_curso' : 'planificada';
 }
 
 /** Cantidad de días entre dos fechas "YYYY-MM-DD", ambas inclusive. */
@@ -138,6 +151,7 @@ export function monthKeyOf(dateStr: string): string {
 const STATUS_LABELS: Record<CampaignStatus, string> = {
   planificada: 'Planificada',
   en_curso: 'En curso',
+  esperando_finalizacion: 'Esperando finalización',
   finalizada: 'Finalizada',
 };
 

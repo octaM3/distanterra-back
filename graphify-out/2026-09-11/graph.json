@@ -1132,7 +1132,7 @@
       "file_type": "code",
       "norm_label": "createcampaignexpensedto",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L14"
+      "source_location": "L21"
     },
     {
       "id": "src_campaigns_dto_update_campaign_expense_dto_updatecampaignexpensedto",
@@ -1600,7 +1600,7 @@
       "file_type": "code",
       "norm_label": "campaigndetail",
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L115"
+      "source_location": "L117"
     },
     {
       "id": "src_database_entities_stock_item_entity_stockitem",
@@ -1665,7 +1665,7 @@
       "file_type": "code",
       "norm_label": "campaignactivitylogview",
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L102"
+      "source_location": "L104"
     },
     {
       "id": "src_campaigns_campaigns_types_campaignexpensemonthsummary",
@@ -1678,7 +1678,7 @@
       "file_type": "code",
       "norm_label": "campaignexpensemonthsummary",
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L110"
+      "source_location": "L112"
     },
     {
       "id": "src_campaigns_campaigns_types_campaignexpenseview",
@@ -2596,7 +2596,7 @@
       "file_type": "code",
       "norm_label": ".create()",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L303"
+      "source_location": "L309"
     },
     {
       "id": "src_campaigns_campaigns_service_campaignsservice_extend",
@@ -2608,7 +2608,7 @@
       "file_type": "code",
       "norm_label": ".extend()",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L328"
+      "source_location": "L334"
     },
     {
       "id": "src_campaigns_campaigns_service_campaignsservice_findall",
@@ -2644,7 +2644,7 @@
       "file_type": "code",
       "norm_label": ".finish()",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L350"
+      "source_location": "L356"
     },
     {
       "id": "src_campaigns_campaigns_service_campaignsservice_softremove",
@@ -2656,7 +2656,7 @@
       "file_type": "code",
       "norm_label": ".softremove()",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L362"
+      "source_location": "L368"
     },
     {
       "id": "src_campaigns_campaigns_service_campaignsservice_tolistitem",
@@ -2680,7 +2680,7 @@
       "file_type": "code",
       "norm_label": ".update()",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L314"
+      "source_location": "L320"
     },
     {
       "id": "scripts_init_db_main",
@@ -2944,7 +2944,7 @@
       "file_type": "code",
       "norm_label": ".assertinvoicefile()",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L99"
+      "source_location": "L106"
     },
     {
       "id": "src_campaigns_campaign_expenses_service_campaignexpensesservice_constructor",
@@ -2980,7 +2980,7 @@
       "file_type": "code",
       "norm_label": ".deleteinvoicefile()",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L79"
+      "source_location": "L86"
     },
     {
       "id": "src_campaigns_campaign_expenses_service_campaignexpensesservice_findoneorfail",
@@ -3004,7 +3004,7 @@
       "file_type": "code",
       "norm_label": ".remove()",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L91"
+      "source_location": "L98"
     },
     {
       "id": "src_campaigns_campaign_expenses_service_campaignexpensesservice_update",
@@ -3016,7 +3016,7 @@
       "file_type": "code",
       "norm_label": ".update()",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L52"
+      "source_location": "L55"
     },
     {
       "id": "src_stock_categories_stock_categories_service_stockcategoriesservice_findoneorfail",
@@ -3605,6 +3605,18 @@
       "norm_label": ".update()",
       "source_file": "src/vehicles/vehicles.service.ts",
       "source_location": "L264"
+    },
+    {
+      "id": "src_campaigns_dto_create_campaign_expense_dto_tooptionalnumber",
+      "label": "toOptionalNumber()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 46,
+      "community_name": "campaign-expenses.controller.ts",
+      "file_type": "code",
+      "norm_label": "tooptionalnumber()",
+      "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
+      "source_location": "L18"
     },
     {
       "id": "src_contact_messages_contact_messages_controller_contactmessagescontroller_constructor",
@@ -5677,15 +5689,15 @@
       "source_location": "L35"
     },
     {
-      "id": "package_dependencies_class_validator",
-      "label": "class-validator",
+      "id": "package_dependencies_reflect_metadata",
+      "label": "reflect-metadata",
       "_origin": "ast",
       "community": 10,
       "community_name": "dependencies",
       "file_type": "code",
-      "norm_label": "class-validator",
+      "norm_label": "reflect-metadata",
       "source_file": "package.json",
-      "source_location": "L37"
+      "source_location": "L46"
     },
     {
       "id": "package_dependencies_typeorm",
@@ -5710,15 +5722,15 @@
       "source_location": "L35"
     },
     {
-      "id": "class_validator",
-      "label": "class-validator",
+      "id": "reflect_metadata",
+      "label": "reflect-metadata",
       "_origin": "ast",
       "community": 10,
       "community_name": "dependencies",
       "file_type": "concept",
-      "norm_label": "class-validator",
+      "norm_label": "reflect-metadata",
       "source_file": "package.json",
-      "source_location": "L37"
+      "source_location": "L46"
     },
     {
       "id": "typeorm",
@@ -7489,26 +7501,26 @@
       "source_location": "L45"
     },
     {
-      "id": "package_dependencies_reflect_metadata",
-      "label": "reflect-metadata",
+      "id": "package_dependencies_class_validator",
+      "label": "class-validator",
       "_origin": "ast",
       "community": 31,
-      "community_name": "reflect-metadata",
+      "community_name": "class-validator",
       "file_type": "code",
-      "norm_label": "reflect-metadata",
+      "norm_label": "class-validator",
       "source_file": "package.json",
-      "source_location": "L46"
+      "source_location": "L37"
     },
     {
-      "id": "reflect_metadata",
-      "label": "reflect-metadata",
+      "id": "class_validator",
+      "label": "class-validator",
       "_origin": "ast",
       "community": 31,
-      "community_name": "reflect-metadata",
+      "community_name": "class-validator",
       "file_type": "concept",
-      "norm_label": "reflect-metadata",
+      "norm_label": "class-validator",
       "source_file": "package.json",
-      "source_location": "L46"
+      "source_location": "L37"
     },
     {
       "id": "package_dependencies_rxjs",
@@ -9907,17 +9919,6 @@
       "community_name": "campaign-expenses.controller.ts",
       "file_type": "code",
       "norm_label": "transform",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "src_campaigns_dto_create_campaign_expense_dto_ts_type",
-      "label": "Type",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "campaign-expenses.controller.ts",
-      "file_type": "code",
-      "norm_label": "type",
       "source_file": "",
       "source_location": ""
     },
@@ -13731,7 +13732,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L93",
+      "source_location": "L100",
       "weight": 1.0
     },
     {
@@ -13743,7 +13744,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L59",
+      "source_location": "L62",
       "weight": 1.0
     },
     {
@@ -13755,7 +13756,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L74",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -13995,7 +13996,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L311",
+      "source_location": "L317",
       "weight": 1.0
     },
     {
@@ -14007,7 +14008,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L311",
+      "source_location": "L317",
       "weight": 1.0
     },
     {
@@ -14019,7 +14020,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L329",
+      "source_location": "L335",
       "weight": 1.0
     },
     {
@@ -14031,7 +14032,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L347",
+      "source_location": "L353",
       "weight": 1.0
     },
     {
@@ -14043,7 +14044,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L347",
+      "source_location": "L353",
       "weight": 1.0
     },
     {
@@ -14067,7 +14068,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L351",
+      "source_location": "L357",
       "weight": 1.0
     },
     {
@@ -14079,7 +14080,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L359",
+      "source_location": "L365",
       "weight": 1.0
     },
     {
@@ -14151,7 +14152,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L254",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -14163,7 +14164,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L263",
+      "source_location": "L268",
       "weight": 1.0
     },
     {
@@ -14175,7 +14176,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L279",
+      "source_location": "L284",
       "weight": 1.0
     },
     {
@@ -14199,7 +14200,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L364",
+      "source_location": "L370",
       "weight": 1.0
     },
     {
@@ -14223,7 +14224,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L316",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -14235,7 +14236,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L325",
+      "source_location": "L331",
       "weight": 1.0
     },
     {
@@ -17103,19 +17104,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "src_campaigns_dto_create_campaign_expense_dto_createcampaignexpensedto",
-      "target": "src_campaigns_dto_create_campaign_expense_dto_ts_type",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "decorator",
-      "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -17127,7 +17116,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L28",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -17139,7 +17128,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L29",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -17151,7 +17140,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L32",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -17163,7 +17152,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L39",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -17175,7 +17164,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L42",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -17187,7 +17176,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L43",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -17199,7 +17188,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L44",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -17211,7 +17200,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L45",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -18656,6 +18645,18 @@
     },
     {
       "source": "src_database_entities_campaign_expense_entity_campaignexpense",
+      "target": "src_database_entities_campaign_expense_entity_ts_deletedatecolumn",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "src/database/entities/campaign-expense.entity.ts",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "src_database_entities_campaign_expense_entity_campaignexpense",
       "target": "src_database_entities_campaign_expense_entity_ts_entity",
       "relation": "references",
       "_origin": "ast",
@@ -18687,7 +18688,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L63",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -18699,7 +18700,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L66",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -18711,7 +18712,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L67",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -18723,7 +18724,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L70",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -18735,19 +18736,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L73",
-      "weight": 1.0
-    },
-    {
-      "source": "src_database_entities_campaign_expense_entity_campaignexpense",
-      "target": "src_database_entities_campaign_expense_entity_ts_deletedatecolumn",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "decorator",
-      "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L76",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -21927,7 +21916,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L97",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -21951,7 +21940,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L37",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -22035,7 +22024,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "src/database/entities/campaign-expense.entity.ts",
-      "source_location": "L66",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -22371,7 +22360,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L52",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -22851,7 +22840,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L303",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -22863,7 +22852,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L328",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -22899,7 +22888,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L350",
+      "source_location": "L356",
       "weight": 1.0
     },
     {
@@ -22923,7 +22912,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L314",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -32979,7 +32968,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L52",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -33387,7 +33376,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L303",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -33399,7 +33388,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L328",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -33423,7 +33412,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L314",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -34107,7 +34096,7 @@
       "confidence_score": 1.0,
       "context": "type",
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L115",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -35537,7 +35526,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L102",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -35548,7 +35537,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L110",
+      "source_location": "L112",
       "weight": 1.0
     },
     {
@@ -35559,7 +35548,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.types.ts",
-      "source_location": "L115",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -35828,13 +35817,24 @@
     },
     {
       "source": "src_campaigns_dto_create_campaign_expense_dto",
+      "target": "src_campaigns_dto_create_campaign_expense_dto_tooptionalnumber",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "src_campaigns_dto_create_campaign_expense_dto",
       "target": "src_campaigns_dto_create_campaign_expense_dto_createcampaignexpensedto",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/dto/create-campaign-expense.dto.ts",
-      "source_location": "L14",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -37599,6 +37599,17 @@
     },
     {
       "source": "src_campaigns_campaign_expenses_service_campaignexpensesservice",
+      "target": "src_campaigns_campaign_expenses_service_campaignexpensesservice_assertinvoicefile",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/campaigns/campaign-expenses.service.ts",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "src_campaigns_campaign_expenses_service_campaignexpensesservice",
       "target": "src_campaigns_campaign_expenses_service_campaignexpensesservice_constructor",
       "relation": "method",
       "_origin": "ast",
@@ -37638,7 +37649,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L52",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -37649,7 +37660,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L79",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -37660,18 +37671,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L91",
-      "weight": 1.0
-    },
-    {
-      "source": "src_campaigns_campaign_expenses_service_campaignexpensesservice",
-      "target": "src_campaigns_campaign_expenses_service_campaignexpensesservice_assertinvoicefile",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L99",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -38210,18 +38210,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L303",
-      "weight": 1.0
-    },
-    {
-      "source": "src_campaigns_campaigns_service_campaignsservice",
-      "target": "src_campaigns_campaigns_service_campaignsservice_update",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L314",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -38237,13 +38226,24 @@
     },
     {
       "source": "src_campaigns_campaigns_service_campaignsservice",
+      "target": "src_campaigns_campaigns_service_campaignsservice_update",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/campaigns/campaigns.service.ts",
+      "source_location": "L320",
+      "weight": 1.0
+    },
+    {
+      "source": "src_campaigns_campaigns_service_campaignsservice",
       "target": "src_campaigns_campaigns_service_campaignsservice_extend",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L328",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -38254,7 +38254,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L350",
+      "source_location": "L356",
       "weight": 1.0
     },
     {
@@ -38265,7 +38265,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/campaigns/campaigns.service.ts",
-      "source_location": "L362",
+      "source_location": "L368",
       "weight": 1.0
     },
     {
@@ -40051,7 +40051,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L92",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -40063,7 +40063,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -40075,7 +40075,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/campaigns/campaign-expenses.service.ts",
-      "source_location": "L60",
+      "source_location": "L63",
       "weight": 1.0
     },
     {

@@ -57,7 +57,7 @@ export class CampaignsService {
       startDate: campaign.startDate,
       endDate: campaign.endDate,
       finishedAt: campaign.finishedAt,
-      status: computeCampaignStatus(campaign.startDate, campaign.finishedAt),
+      status: computeCampaignStatus(campaign.startDate, campaign.endDate, campaign.finishedAt),
       createdAt: campaign.createdAt,
     };
   }

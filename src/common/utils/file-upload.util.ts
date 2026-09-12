@@ -1,5 +1,6 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import { diskStorage, memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -82,4 +83,51 @@ export function buildImageMemoryMulterOptions() {
     fileFilter: imageFileFilter,
     limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
   };
+}
+
+// El mimetype de un .kmz varía mucho según navegador/SO (a veces llega vacío
+// o como "application/octet-stream", ya que no todos lo reconocen como zip);
+// se filtra por extensión en vez de por mimetype, más confiable acá.
+const kmzFileFilter = (
+  _req: unknown,
+  file: { originalname: string },
+  callback: (error: Error | null, acceptFile: boolean) => void,
+) => {
+  if (!file.originalname.toLowerCase().endsWith('.kmz')) {
+    logger.warn(`Tipo de archivo rechazado para tracking: "${file.originalname}"`);
+    callback(new BadRequestException('Solo se aceptan archivos .kmz.'), false);
+    return;
+  }
+  callback(null, true);
+};
+
+/** En memoria: el .kmz se parsea (ver kml-parser.util.ts) y se vuelve a guardar aparte. */
+export function buildKmzMemoryMulterOptions() {
+  return {
+    storage: memoryStorage(),
+    fileFilter: kmzFileFilter,
+    limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
+  };
+}
+
+/**
+ * Guarda un archivo tal cual (sin procesar, a diferencia de
+ * optimizeAndSaveImage) en UPLOADS_DIR/<subfolder> con nombre aleatorio, y
+ * devuelve la ruta relativa para persistir en la base de datos. Usado para
+ * el .kmz original de un tracking, que se conserva para poder descargarlo
+ * aunque ya se hayan extraído sus puntos.
+ */
+export async function saveRawFile(file: Express.Multer.File, subfolder: string): Promise<string> {
+  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
+  const targetDir = join(uploadsDir, subfolder);
+  if (!existsSync(targetDir)) {
+    mkdirSync(targetDir, { recursive: true });
+    logger.log(`Directorio de uploads creado: ${targetDir}`);
+  }
+
+  const filename = `${uuidv4()}${extname(file.originalname).toLowerCase()}`;
+  await writeFile(join(targetDir, filename), file.buffer);
+  logger.debug(`Archivo guardado: "${file.originalname}" → "${filename}" en ${targetDir}`);
+
+  return `${subfolder}/${filename}`;
 }
