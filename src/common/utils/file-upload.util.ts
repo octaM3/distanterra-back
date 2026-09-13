@@ -1,6 +1,6 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync } from 'fs';
-import { writeFile } from 'fs/promises';
+import { unlink, writeFile } from 'fs/promises';
 import { diskStorage, memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,6 +101,32 @@ const kmzFileFilter = (
   callback(null, true);
 };
 
+const pdfFileFilter = (
+  _req: unknown,
+  file: { mimetype: string; originalname: string },
+  callback: (error: Error | null, acceptFile: boolean) => void,
+) => {
+  if (file.mimetype !== 'application/pdf') {
+    logger.warn(`Tipo de archivo rechazado: "${file.mimetype}" (archivo: "${file.originalname}")`);
+    callback(new BadRequestException('Solo se aceptan archivos PDF.'), false);
+    return;
+  }
+  callback(null, true);
+};
+
+/**
+ * En memoria: el PDF se guarda tal cual con saveRawFile (no hay nada que
+ * optimizar). Usado para la documentación de empleados (estudios médicos y
+ * pólizas de seguro).
+ */
+export function buildPdfMemoryMulterOptions() {
+  return {
+    storage: memoryStorage(),
+    fileFilter: pdfFileFilter,
+    limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
+  };
+}
+
 /** En memoria: el .kmz se parsea (ver kml-parser.util.ts) y se vuelve a guardar aparte. */
 export function buildKmzMemoryMulterOptions() {
   return {
@@ -108,6 +134,23 @@ export function buildKmzMemoryMulterOptions() {
     fileFilter: kmzFileFilter,
     limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
   };
+}
+
+/**
+ * Borra del disco un archivo ya subido, a partir de la ruta relativa que se
+ * guardó en la base de datos. Se usa al reemplazar un archivo por otro, para
+ * no dejar huérfano el anterior. No falla si el archivo ya no está.
+ */
+export async function deleteUploadedFile(relativePath: string): Promise<void> {
+  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
+  const fullPath = join(uploadsDir, relativePath);
+  try {
+    await unlink(fullPath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logger.warn(`No se pudo eliminar el archivo ${fullPath}: ${(err as Error).message}`);
+    }
+  }
 }
 
 /**

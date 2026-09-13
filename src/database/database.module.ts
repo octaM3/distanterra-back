@@ -13,6 +13,9 @@ import { Campaign } from './entities/campaign.entity';
 import { Comment } from './entities/comment.entity';
 import { Company } from './entities/company.entity';
 import { ContactMessage } from './entities/contact-message.entity';
+import { Employee } from './entities/employee.entity';
+import { EmployeeInsurancePolicy } from './entities/employee-insurance-policy.entity';
+import { EmployeeMedicalExam } from './entities/employee-medical-exam.entity';
 import { Experience } from './entities/experience.entity';
 import { GalleryImage } from './entities/gallery-image.entity';
 import { Image } from './entities/image.entity';
@@ -53,6 +56,9 @@ import { Vehicle } from './entities/vehicle.entity';
           CampaignPackAnimal,
           CampaignExpense,
           CampaignActivityLog,
+          Employee,
+          EmployeeMedicalExam,
+          EmployeeInsurancePolicy,
           PuntoInteres,
           Tracking,
         ],
@@ -79,6 +85,9 @@ import { Vehicle } from './entities/vehicle.entity';
       CampaignPackAnimal,
       CampaignExpense,
       CampaignActivityLog,
+      Employee,
+      EmployeeMedicalExam,
+      EmployeeInsurancePolicy,
       PuntoInteres,
       Tracking,
     ]),
