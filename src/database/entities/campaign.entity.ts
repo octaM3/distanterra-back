@@ -11,10 +11,19 @@ import {
 import { Admin } from './admin.entity';
 import { Company } from './company.entity';
 
+export const CAMPAIGN_KINDS = ['campana', 'servicio'] as const;
+export type CampaignKind = (typeof CAMPAIGN_KINDS)[number];
+
 @Entity({ name: 'campaigns' })
 export class Campaign {
   @PrimaryGeneratedColumn()
   id: number;
+
+  // Un "servicio" es un alquiler suelto (camioneta, Starlink): usa las mismas
+  // asignaciones de stock y vehículos que una campaña —y por lo tanto el mismo
+  // control de disponibilidad— pero sin baqueanos, gastos ni bitácora.
+  @Column({ type: 'varchar', length: 20, default: 'campana' })
+  kind: CampaignKind;
 
   @Column({ type: 'int', name: 'company_id' })
   companyId: number;

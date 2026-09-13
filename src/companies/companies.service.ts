@@ -39,27 +39,46 @@ export class CompaniesService {
   async update(id: number, dto: UpdateCompanyDto): Promise<Company> {
     this.logger.log(`Actualizando empresa id=${id}`);
     const company = await this.findOneOrFail(id);
-    Object.assign(company, dto);
+    // El nombre identifica a la empresa en campañas, gestión y facturas ya
+    // emitidas: se edita todo lo demás, pero el nombre queda fijo.
+    const { name: _ignoredName, ...editable } = dto;
+    Object.assign(company, editable);
     const saved = await this.companyRepository.save(company);
     this.logger.log(`Empresa id=${id} actualizada correctamente`);
     return saved;
   }
 
+  /** Cuántas filas vigentes de `table` referencian a esta empresa. */
+  private async countLinked(table: string, id: number): Promise<number> {
+    const row = await this.companyRepository.manager
+      .createQueryBuilder()
+      .select('COUNT(*)', 'count')
+      .from(table, 't')
+      .where('t.company_id = :id', { id })
+      .andWhere('t.deleted_at IS NULL')
+      .getRawOne<{ count: string }>();
+    return row ? parseInt(row.count, 10) : 0;
+  }
+
   async softRemove(id: number): Promise<void> {
     this.logger.log(`Eliminando (soft) empresa id=${id}`);
     const company = await this.findOneOrFail(id);
-    const campaignsCount = await this.companyRepository.manager
-      .createQueryBuilder()
-      .select('COUNT(*)', 'count')
-      .from('campaigns', 'c')
-      .where('c.company_id = :id', { id })
-      .andWhere('c.deleted_at IS NULL')
-      .getRawOne<{ count: string }>();
-    if (campaignsCount && parseInt(campaignsCount.count, 10) > 0) {
-      throw new BadRequestException(
-        'No se puede eliminar la empresa: tiene campañas asociadas. Elimine o reasigne las campañas primero.',
-      );
+
+    // Una empresa referenciada no se elimina: dejaría campañas, ítems de
+    // gestión o facturas ya emitidas apuntando a alguien que no existe.
+    const linked: { table: string; label: string }[] = [
+      { table: 'campaigns', label: 'campañas o servicios' },
+      { table: 'service_records', label: 'ítems de gestión' },
+      { table: 'financial_documents', label: 'archivos (facturas o recibos)' },
+    ];
+    for (const { table, label } of linked) {
+      if ((await this.countLinked(table, id)) > 0) {
+        throw new BadRequestException(
+          `No se puede eliminar la empresa: tiene ${label} asociados.`,
+        );
+      }
     }
+
     await this.companyRepository.softRemove(company);
     this.logger.log(`Empresa id=${id} eliminada correctamente`);
   }

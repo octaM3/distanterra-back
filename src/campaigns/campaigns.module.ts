@@ -10,6 +10,7 @@ import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
 import { StockItemsModule } from '@/stock-items/stock-items.module';
 import { StockCategoriesModule } from '@/stock-categories/stock-categories.module';
 import { VehiclesModule } from '@/vehicles/vehicles.module';
+import { ServiceRecordsModule } from '@/service-records/service-records.module';
 import { CampaignActivityLogsController } from './campaign-activity-logs.controller';
 import { CampaignActivityLogsService } from './campaign-activity-logs.service';
 import { CampaignExpensesController } from './campaign-expenses.controller';
@@ -40,6 +41,7 @@ import { CampaignsService } from './campaigns.service';
     StockItemsModule,
     StockCategoriesModule,
     VehiclesModule,
+    ServiceRecordsModule,
   ],
   controllers: [
     CampaignsController,

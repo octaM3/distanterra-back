@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppConfig } from '@/config/configuration';
-import { Campaign } from '@/database/entities/campaign.entity';
+import { Campaign, CampaignKind } from '@/database/entities/campaign.entity';
 import { CampaignActivityLog } from '@/database/entities/campaign-activity-log.entity';
 import { CampaignExpense } from '@/database/entities/campaign-expense.entity';
 import { CampaignGuide } from '@/database/entities/campaign-guide.entity';
@@ -11,6 +11,7 @@ import { CampaignPackAnimal } from '@/database/entities/campaign-pack-animal.ent
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
 import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
 import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { ServiceRecordsService } from '@/service-records/service-records.service';
 import { CampaignDetail, CampaignExpenseMonthSummary, CampaignListItem } from './campaigns.types';
 import {
   computeCampaignStatus,
@@ -45,11 +46,13 @@ export class CampaignsService {
     @InjectRepository(CampaignActivityLog)
     private readonly campaignActivityLogRepository: Repository<CampaignActivityLog>,
     private readonly configService: ConfigService<AppConfig, true>,
+    private readonly serviceRecordsService: ServiceRecordsService,
   ) {}
 
   private toListItem(campaign: Campaign): CampaignListItem {
     return {
       id: campaign.id,
+      kind: campaign.kind,
       companyId: campaign.companyId,
       companyName: campaign.company?.name ?? '',
       name: campaign.name,
@@ -62,9 +65,11 @@ export class CampaignsService {
     };
   }
 
-  async findAll(): Promise<CampaignListItem[]> {
-    this.logger.debug('Obteniendo todas las campañas');
+  /** `kind` separa las expediciones ("campana") de los alquileres sueltos ("servicio"); sin filtro vienen todas. */
+  async findAll(kind?: CampaignKind): Promise<CampaignListItem[]> {
+    this.logger.debug(`Obteniendo campañas${kind ? ` de tipo ${kind}` : ''}`);
     const campaigns = await this.campaignRepository.find({
+      where: kind ? { kind } : {},
       relations: ['company'],
       order: { startDate: 'DESC' },
     });
@@ -314,6 +319,9 @@ export class CampaignsService {
     const campaign = this.campaignRepository.create({ ...dto, createdBy });
     const saved = await this.campaignRepository.save(campaign);
     this.logger.log(`Campaña creada con id=${saved.id}`);
+    // Su ítem de gestión nace acá: así ninguna campaña/servicio queda fuera
+    // del control de facturación por olvido.
+    await this.serviceRecordsService.createForCampaign(saved);
     return this.toListItem(await this.findCampaignEntityOrFail(saved.id));
   }
 
@@ -368,6 +376,8 @@ export class CampaignsService {
   async softRemove(id: number): Promise<void> {
     this.logger.log(`Eliminando (soft) campaña id=${id}`);
     const campaign = await this.findCampaignEntityOrFail(id);
+    // Se lleva su ítem de gestión, salvo que ya tenga factura o recibo cargados.
+    await this.serviceRecordsService.removeForCampaign(id);
     await this.campaignRepository.softRemove(campaign);
     this.logger.log(`Campaña id=${id} eliminada correctamente`);
   }

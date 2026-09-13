@@ -1,7 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { CAMPAIGN_KINDS, CampaignKind } from '@/database/entities/campaign.entity';
 
 export class CreateCampaignDto {
+  // Por defecto campaña: los servicios sueltos lo mandan explícito.
+  @IsOptional()
+  @IsIn(CAMPAIGN_KINDS)
+  kind?: CampaignKind;
+
   @Type(() => Number)
   @IsInt()
   companyId: number;

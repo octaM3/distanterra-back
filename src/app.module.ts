@@ -16,6 +16,8 @@ import { StockItemsModule } from './stock-items/stock-items.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { EmployeesModule } from './employees/employees.module';
+import { ServiceRecordsModule } from './service-records/service-records.module';
+import { FinancialDocumentsModule } from './financial-documents/financial-documents.module';
 import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { ImagesModule } from './images/images.module';
 import { GalleryModule } from './gallery/gallery.module';
@@ -66,6 +68,8 @@ import { TrackingsModule } from './trackings/trackings.module';
     VehiclesModule,
     CampaignsModule,
     EmployeesModule,
+    ServiceRecordsModule,
+    FinancialDocumentsModule,
     PuntosInteresModule,
     TrackingsModule,
   ],

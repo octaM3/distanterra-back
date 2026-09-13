@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,10 +9,12 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { CAMPAIGN_KINDS, CampaignKind } from '@/database/entities/campaign.entity';
 import { CurrentAdmin } from '@/auth/current-admin.decorator';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { JwtPayload } from '@/auth/jwt-payload.interface';
@@ -33,9 +36,12 @@ export class CampaignsController {
   ) {}
 
   @Get()
-  async findAll(): Promise<CampaignListItem[]> {
-    this.logger.debug('GET /api/admin/campaigns');
-    return this.campaignsService.findAll();
+  async findAll(@Query('kind') kind?: string): Promise<CampaignListItem[]> {
+    this.logger.debug(`GET /api/admin/campaigns${kind ? `?kind=${kind}` : ''}`);
+    if (kind && !CAMPAIGN_KINDS.includes(kind as CampaignKind)) {
+      throw new BadRequestException(`Tipo inválido: ${kind}`);
+    }
+    return this.campaignsService.findAll(kind as CampaignKind | undefined);
   }
 
   @Get(':id')

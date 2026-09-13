@@ -20,6 +20,8 @@ import { Experience } from './entities/experience.entity';
 import { GalleryImage } from './entities/gallery-image.entity';
 import { Image } from './entities/image.entity';
 import { PuntoInteres } from './entities/punto-interes.entity';
+import { FinancialDocument } from './entities/financial-document.entity';
+import { ServiceRecord } from './entities/service-record.entity';
 import { StockCategory } from './entities/stock-category.entity';
 import { StockItem } from './entities/stock-item.entity';
 import { Tracking } from './entities/tracking.entity';
@@ -59,6 +61,8 @@ import { Vehicle } from './entities/vehicle.entity';
           Employee,
           EmployeeMedicalExam,
           EmployeeInsurancePolicy,
+          ServiceRecord,
+          FinancialDocument,
           PuntoInteres,
           Tracking,
         ],
@@ -88,6 +92,8 @@ import { Vehicle } from './entities/vehicle.entity';
       Employee,
       EmployeeMedicalExam,
       EmployeeInsurancePolicy,
+      ServiceRecord,
+      FinancialDocument,
       PuntoInteres,
       Tracking,
     ]),
