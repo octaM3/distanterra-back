@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import ExcelJS from 'exceljs';
+import { ServiceRecordsService } from '@/service-records/service-records.service';
 import { CampaignsService } from './campaigns.service';
+import { CampaignDetail } from './campaigns.types';
 import { campaignStatusLabel } from './campaigns.util';
 
 const HEADER_FILL: ExcelJS.Fill = {
@@ -15,7 +17,10 @@ const CURRENCY_FORMAT = '#,##0.00';
 export class CampaignExportService {
   private readonly logger = new Logger(CampaignExportService.name);
 
-  constructor(private readonly campaignsService: CampaignsService) {}
+  constructor(
+    private readonly campaignsService: CampaignsService,
+    private readonly serviceRecordsService: ServiceRecordsService,
+  ) {}
 
   private styleHeaderRow(row: ExcelJS.Row): void {
     row.eachCell((cell) => {
@@ -32,43 +37,87 @@ export class CampaignExportService {
     workbook.creator = 'Distanterra';
     workbook.created = new Date();
 
+    // Un servicio suelto solo tiene stock y vehículos: sus hojas de baqueanos,
+    // tracción, gastos y bitácora estarían siempre vacías, así que no se generan.
+    const isService = detail.kind === 'servicio';
+    const record = await this.serviceRecordsService.findViewByCampaign(campaignId);
+
     // ---- Hoja 1: Resumen ----
     const summarySheet = workbook.addWorksheet('Resumen');
     summarySheet.columns = [
       { key: 'label', width: 32 },
       { key: 'value', width: 40 },
     ];
-    summarySheet.addRows([
-      { label: 'Campaña', value: detail.name },
-      { label: 'Empresa', value: detail.companyName },
-      { label: 'Ubicación', value: detail.location ?? '-' },
-      { label: 'Estado', value: campaignStatusLabel(detail.status) },
-      { label: 'Fecha de inicio', value: detail.startDate },
-      { label: 'Fecha de fin', value: detail.endDate },
-      { label: 'Duración', value: `${detail.durationDays} día(s)` },
-      {
-        label: 'Finalizada el',
-        value: detail.finishedAt ? new Date(detail.finishedAt).toLocaleString('es-AR') : '-',
-      },
-      { label: '', value: '' },
-      { label: 'Total stock asignado', value: detail.stockItemsTotalCost },
-      { label: 'Total vehículos asignados', value: detail.vehiclesTotalCost },
-      { label: 'Total baqueanos asignados', value: detail.guidesTotalCost },
-      { label: 'Total tracción a sangre asignada', value: detail.packAnimalsTotalCost },
-      { label: 'Total gastos extra', value: detail.expensesTotal },
-      { label: 'TOTAL GENERAL', value: detail.grandTotal },
-    ]);
-    summarySheet.getColumn('value').numFmt = CURRENCY_FORMAT;
-    ['B10', 'B11', 'B12', 'B13', 'B14', 'B15'].forEach((ref) => {
-      summarySheet.getCell(ref).numFmt = CURRENCY_FORMAT;
-    });
-    summarySheet.getRow(1).font = { bold: true };
-    summarySheet.getRow(15).font = { bold: true };
 
-    if (detail.expensesByMonth.length > 0) {
+    const addSummaryRow = (
+      label: string,
+      value: string | number,
+      options: { money?: boolean; bold?: boolean } = {},
+    ) => {
+      const row = summarySheet.addRow({ label, value });
+      if (options.money) row.getCell('value').numFmt = CURRENCY_FORMAT;
+      if (options.bold) row.font = { bold: true };
+      return row;
+    };
+
+    addSummaryRow(isService ? 'Servicio' : 'Campaña', detail.name, { bold: true });
+    addSummaryRow('Empresa', detail.companyName);
+    if (!isService) addSummaryRow('Ubicación', detail.location ?? '-');
+    addSummaryRow('Estado', campaignStatusLabel(detail.status));
+    addSummaryRow('Fecha de inicio', detail.startDate);
+    addSummaryRow('Fecha de fin', detail.endDate);
+    addSummaryRow('Duración', `${detail.durationDays} día(s)`);
+    addSummaryRow(
+      'Finalizada el',
+      detail.finishedAt ? new Date(detail.finishedAt).toLocaleString('es-AR') : '-',
+    );
+
+    summarySheet.addRow({});
+    addSummaryRow('Total stock asignado (USD)', detail.stockItemsTotalCost, { money: true });
+    addSummaryRow('Total vehículos asignados (USD)', detail.vehiclesTotalCost, { money: true });
+    if (!isService) {
+      addSummaryRow('Total baqueanos asignados (USD)', detail.guidesTotalCost, { money: true });
+      addSummaryRow('Total tracción a sangre asignada (USD)', detail.packAnimalsTotalCost, {
+        money: true,
+      });
+      addSummaryRow('Total gastos extra (USD)', detail.expensesTotal, { money: true });
+      // Los gastos en pesos van aparte: no hay tasa de cambio para sumarlos al total.
+      addSummaryRow('Total gastos extra (ARS)', detail.expensesTotalArs, { money: true });
+    }
+    addSummaryRow('TOTAL GENERAL (USD)', detail.grandTotal, { money: true, bold: true });
+
+    // Estado de facturación y cobro, tal como se controla en la sección Gestión.
+    if (record) {
       summarySheet.addRow({});
-      summarySheet.addRow({ label: 'Gastos por mes', value: '' });
-      summarySheet.getRow(summarySheet.lastRow!.number).font = { bold: true };
+      addSummaryRow('Facturación y cobro', '', { bold: true });
+      addSummaryRow('Mes imputado', record.serviceMonth);
+      addSummaryRow('Factura', record.invoiceSent ? 'Enviada' : 'Pendiente');
+      if (record.invoiceSent) {
+        addSummaryRow('N° de factura', record.invoiceNumber ?? '-');
+        addSummaryRow('Fecha de emisión', record.invoiceSentAt ?? '-');
+        addSummaryRow(
+          `Monto facturado (${record.invoiceCurrency ?? '-'})`,
+          record.invoiceAmount ?? '-',
+          { money: record.invoiceAmount != null },
+        );
+      }
+      addSummaryRow('Pago', record.paymentReceived ? 'Cobrado' : 'Pendiente');
+      if (record.paymentReceived) {
+        addSummaryRow('Fecha de cobro', record.paymentReceivedAt ?? '-');
+        addSummaryRow(
+          `Monto cobrado (${record.receiptCurrency ?? '-'})`,
+          record.receiptAmount ?? '-',
+          { money: record.receiptAmount != null },
+        );
+      }
+      if (record.creditNotesCount > 0) {
+        addSummaryRow('Notas de crédito', record.creditNotesCount);
+      }
+    }
+
+    if (!isService && detail.expensesByMonth.length > 0) {
+      summarySheet.addRow({});
+      addSummaryRow('Gastos por mes (USD)', '', { bold: true });
       const monthHeaderRow = summarySheet.addRow({ label: 'Mes', value: 'Total' });
       this.styleHeaderRow(monthHeaderRow);
       for (const m of detail.expensesByMonth) {
@@ -156,6 +205,22 @@ export class CampaignExportService {
     vehiclesTotalRow.font = { bold: true };
     vehiclesTotalRow.getCell('cost').numFmt = CURRENCY_FORMAT;
 
+    if (!isService) {
+      this.addCampaignOnlySheets(workbook, detail);
+    }
+
+    const arrayBuffer = await workbook.xlsx.writeBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const safeName =
+      detail.name
+        .replace(/[^a-z0-9-_ ]/gi, '')
+        .trim()
+        .replace(/\s+/g, '_') || `${isService ? 'servicio' : 'campana'}-${campaignId}`;
+    return { buffer, filename: `${safeName}.xlsx` };
+  }
+
+  /** Baqueanos, tracción a sangre, gastos extra y bitácora: solo existen en una campaña. */
+  private addCampaignOnlySheets(workbook: ExcelJS.Workbook, detail: CampaignDetail): void {
     // ---- Hoja 4: Baqueanos asignados ----
     const guidesSheet = workbook.addWorksheet('Baqueanos asignados');
     guidesSheet.columns = [
@@ -284,14 +349,5 @@ export class CampaignExportService {
       });
     }
     activitySheet.getColumn('description').alignment = { wrapText: true };
-
-    const arrayBuffer = await workbook.xlsx.writeBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const safeName =
-      detail.name
-        .replace(/[^a-z0-9-_ ]/gi, '')
-        .trim()
-        .replace(/\s+/g, '_') || `campana-${campaignId}`;
-    return { buffer, filename: `${safeName}.xlsx` };
   }
 }

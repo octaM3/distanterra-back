@@ -200,6 +200,12 @@ export class ServiceRecordsService {
     this.logger.log(`Ítem de gestión de la campaña/servicio id=${campaignId} eliminado`);
   }
 
+  /** Ítem de gestión de una campaña/servicio, para incluir su facturación en el Excel. */
+  async findViewByCampaign(campaignId: number): Promise<ServiceRecordView | null> {
+    const record = await this.serviceRecordRepository.findOne({ where: { campaignId } });
+    return record ? this.toViewById(record.id) : null;
+  }
+
   /**
    * Lo único editable del ítem: el mes al que se imputa y las notas. La
    * empresa, la campaña y la descripción vienen de la campaña/servicio, así no
