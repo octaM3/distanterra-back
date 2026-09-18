@@ -19,7 +19,9 @@
     "db:init": "ts-node -r tsconfig-paths/register scripts/init-db.ts",
     "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts",
     "db:seed-admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts",
-    "db:seed-experiences": "ts-node -r tsconfig-paths/register scripts/seed-experiences.ts"
+    "db:seed-experiences": "ts-node -r tsconfig-paths/register scripts/seed-experiences.ts",
+    "uploads:split": "ts-node -r tsconfig-paths/register scripts/migrate-uploads-split.ts",
+    "trackings:backfill-stats": "ts-node -r tsconfig-paths/register scripts/backfill-tracking-stats.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.29",

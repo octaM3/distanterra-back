@@ -19,7 +19,7 @@ import { AppConfig } from '@/config/configuration';
 import { Image } from '@/database/entities/image.entity';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { buildImageMulterOptions } from '@/common/utils/file-upload.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { ImagesService } from './images.service';
@@ -41,7 +41,7 @@ export class ImagesController {
   private toResponse(image: Image): ImageResponse {
     const apiUrl = this.configService.get('apiUrl', { infer: true });
     const { filePath, ...rest } = image;
-    return { ...rest, url: toPublicFileUrl(apiUrl, filePath) as string };
+    return { ...rest, url: toFileUrl(apiUrl, filePath) as string };
   }
 
   // ---- Endpoints públicos ----

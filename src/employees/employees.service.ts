@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { AppConfig } from '@/config/configuration';
 import { deleteUploadedFile } from '@/common/utils/file-upload.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { Employee } from '@/database/entities/employee.entity';
 import { EmployeeInsurancePolicy } from '@/database/entities/employee-insurance-policy.entity';
 import { EmployeeMedicalExam } from '@/database/entities/employee-medical-exam.entity';
@@ -120,8 +120,8 @@ export class EmployeesService {
         medicalExams[0]?.expiresAt ?? null,
         insurancePolicies[0]?.coveredTo ?? null,
       ),
-      dniFrontUrl: toPublicFileUrl(apiUrl, employee.dniFrontImagePath),
-      dniBackUrl: toPublicFileUrl(apiUrl, employee.dniBackImagePath),
+      dniFrontUrl: toFileUrl(apiUrl, employee.dniFrontImagePath),
+      dniBackUrl: toFileUrl(apiUrl, employee.dniBackImagePath),
       bankCvu: employee.bankCvu,
       bankAlias: employee.bankAlias,
       bankHolder: employee.bankHolder,
@@ -130,7 +130,7 @@ export class EmployeesService {
         id: exam.id,
         examDate: exam.examDate,
         expiresAt: exam.expiresAt,
-        fileUrl: toPublicFileUrl(apiUrl, exam.filePath),
+        fileUrl: toFileUrl(apiUrl, exam.filePath),
         createdAt: exam.createdAt,
       })),
       insurancePolicies: insurancePolicies.map((policy) => ({
@@ -138,7 +138,7 @@ export class EmployeesService {
         insuranceType: policy.insuranceType,
         coveredFrom: policy.coveredFrom,
         coveredTo: policy.coveredTo,
-        fileUrl: toPublicFileUrl(apiUrl, policy.filePath),
+        fileUrl: toFileUrl(apiUrl, policy.filePath),
         createdAt: policy.createdAt,
       })),
       updatedAt: employee.updatedAt,

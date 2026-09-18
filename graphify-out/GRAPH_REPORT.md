@@ -1,21 +1,21 @@
-# Graph Report - distanterra-back  (2026-09-12)
+# Graph Report - distanterra-back  (2026-09-18)
 
 ## Corpus Check
-- 166 files · ~35,494 words
+- 216 files · ~52,371 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1258 nodes · 2464 edges · 92 communities (50 shown, 42 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 112 edges (avg confidence: 0.8)
+- 1658 nodes · 3340 edges · 113 communities (71 shown, 42 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 136 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9671dbd1`
+- Built from commit: `d492d403`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- AppConfig
+- CampaignPackAnimal
 - gallery.controller.ts
 - Experience
 - comments.controller.ts
@@ -33,8 +33,7 @@
 - reflect-metadata
 - helmet
 - trackings.service.ts
-- Distanterra API
-- app.module.ts
+- StockItemsService
 - @nestjs/core
 - @nestjs/jwt
 - @nestjs/mapped-types
@@ -46,9 +45,9 @@
 - passport
 - passport-jwt
 - pg
-- campaigns.module.ts
+- upload-targets.ts
 - rxjs
-- campaigns.service.ts
+- CampaignsService
 - uuid
 - stock-items.service.ts
 - CLAUDE.md
@@ -56,10 +55,10 @@
 - campaign-stock.service.ts
 - Company
 - campaign-pack-animals.service.ts
-- CampaignActivityLog
+- campaigns.module.ts
 - vehicles.service.ts
 - VehiclesService
-- database.module.ts
+- EmployeeInsurancePolicy
 - package.json
 - exceljs
 - @nestjs/common
@@ -67,83 +66,104 @@
 - PuntoInteres
 - campaign-vehicles.service.ts
 - CampaignVehicle
-- eslint-plugin-prettier
-- @nestjs/cli
-- prettier
-- CampaignVehiclesController
+- EmployeeMedicalExam
 - CampaignPackAnimalsController
-- ts-node
+- campaign-guides.service.ts
+- CampaignVehiclesController
+- employees.service.ts
+- FinancialDocumentsService
 - tsconfig-paths
 - Vehicle
 - @types/multer
-- CampaignPackAnimal
+- FinancialDocument
 - VehiclesController
 - @typescript-eslint/eslint-plugin
-- Admin
-- @types/cookie-parser
-- @types/pg
-- AssignGuideDto
-- CampaignStockItem
-- UpdateCampaignGuideDto
-- CampaignGuidesService
-- Campaign
-- .assertCampaignEditable
-- main.ts
-- CampaignStockController
-- dotenv
+- campaign-export.service.ts
 - StockItem
+- CreateFinancialDocumentDto
+- EmployeesService
+- CampaignStockItem
+- service-records.service.ts
+- CampaignGuide
 - StockItemsController
+- campaigns.util.ts
+- .update
+- app.module.ts
+- dotenv
+- financial-documents.service.ts
+- Employee
 - eslint-config-prettier
-- StockItemsService
+- campaigns.service.ts
 - fast-xml-parser
 - @nestjs/config
 - class-transformer
 - typeorm
-- source-map-support
+- PrivateFilesController
 - @types/adm-zip
-- @types/express
+- prettier
 - @types/passport-jwt
+- Campañas
+- file-upload.util.ts
+- ts-loader
+- ServiceRecordsService
+- @types/uuid
+- .assertCampaignEditable
+- @types/bcrypt
+- @types/node
+- typescript
+- JwtAuthGuard
+- Módulos
+- campaigns.types.ts
+- Referencia de la API
+- Archivos subidos
+- Autenticación y seguridad
+- Despliegue
+- Distanterra API
+- Administración
+- Empleados
+- Mapa
+- eslint-plugin-prettier
 
 ## God Nodes (most connected - your core abstractions)
-1. `CampaignsService` - 30 edges
-2. `Campaign` - 30 edges
-3. `StockCategory` - 26 edges
-4. `CampaignExpense` - 24 edges
-5. `CampaignStockItem` - 24 edges
-6. `CampaignVehicle` - 24 edges
-7. `compilerOptions` - 24 edges
-8. `CampaignActivityLog` - 23 edges
-9. `CampaignGuide` - 22 edges
-10. `CampaignPackAnimal` - 22 edges
+1. `Campaign` - 35 edges
+2. `CampaignsService` - 30 edges
+3. `JwtAuthGuard` - 27 edges
+4. `AppConfig` - 27 edges
+5. `Company` - 26 edges
+6. `StockCategory` - 26 edges
+7. `FinancialDocument` - 25 edges
+8. `CampaignExpense` - 24 edges
+9. `CampaignStockItem` - 24 edges
+10. `CampaignVehicle` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `CampaignExpenseView` --references--> `InvoiceType`  [EXTRACTED]
-  src/campaigns/campaigns.types.ts → src/database/entities/campaign-expense.entity.ts
-- `CreateCampaignExpenseDto` --references--> `InvoiceType`  [EXTRACTED]
-  src/campaigns/dto/create-campaign-expense.dto.ts → src/database/entities/campaign-expense.entity.ts
-- `CampaignActivityLog` --references--> `Admin`  [EXTRACTED]
-  src/database/entities/campaign-activity-log.entity.ts → src/database/entities/admin.entity.ts
-- `Campaign` --references--> `Admin`  [EXTRACTED]
-  src/database/entities/campaign.entity.ts → src/database/entities/admin.entity.ts
-- `CampaignExpense` --references--> `Admin`  [EXTRACTED]
-  src/database/entities/campaign-expense.entity.ts → src/database/entities/admin.entity.ts
+- `main()` --calls--> `parseKmzTrack()`  [EXTRACTED]
+  scripts/backfill-tracking-stats.ts → src/common/utils/kml-parser.util.ts
+- `main()` --calls--> `resolveUploadPath()`  [EXTRACTED]
+  scripts/backfill-tracking-stats.ts → src/common/uploads/upload-targets.ts
+- `main()` --calls--> `uploadsBaseDir()`  [EXTRACTED]
+  scripts/migrate-uploads-split.ts → src/common/uploads/upload-targets.ts
+- `main()` --calls--> `visibilityOf()`  [EXTRACTED]
+  scripts/migrate-uploads-split.ts → src/common/uploads/upload-targets.ts
+- `CampaignListItem` --references--> `CampaignStatus`  [EXTRACTED]
+  src/campaigns/campaigns.types.ts → src/campaigns/campaigns.util.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (92 total, 42 thin omitted)
+## Communities (113 total, 42 thin omitted)
 
-### Community 0 - "AppConfig"
-Cohesion: 0.27
-Nodes (6): AuthModule, Module, JwtStrategy, Injectable, InjectRepository, AppConfig
+### Community 0 - "CampaignPackAnimal"
+Cohesion: 0.14
+Nodes (13): CampaignPackAnimalsService, Injectable, InjectRepository, InjectRepository, CampaignPackAnimal, Column, CreateDateColumn, DeleteDateColumn (+5 more)
 
 ### Community 1 - "gallery.controller.ts"
 Cohesion: 0.06
-Nodes (37): Max, GalleryImage, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, CreateGalleryImageDto (+29 more)
+Nodes (39): Max, GalleryImage, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, CreateGalleryImageDto (+31 more)
 
 ### Community 2 - "Experience"
 Cohesion: 0.06
-Nodes (39): ArrayMinSize, ExperienceDescriptionBlock, Experience, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn (+31 more)
+Nodes (41): ArrayMinSize, ExperienceDescriptionBlock, Experience, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn (+33 more)
 
 ### Community 3 - "comments.controller.ts"
 Cohesion: 0.07
@@ -158,16 +178,16 @@ Cohesion: 0.08
 Nodes (28): CONTACT_THROTTLE_LIMIT, ContactMessagesController, Body, Controller, Delete, Get, HttpCode, Param (+20 more)
 
 ### Community 6 - "devDependencies"
-Cohesion: 0.13
-Nodes (15): eslint, devDependencies, eslint, ts-loader, @types/bcrypt, @types/node, @types/uuid, typescript (+7 more)
+Cohesion: 0.12
+Nodes (17): eslint, @nestjs/cli, devDependencies, eslint, @nestjs/cli, source-map-support, ts-node, @types/cookie-parser (+9 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.08
 Nodes (24): compilerOptions, allowSyntheticDefaultImports, baseUrl, declaration, emitDecoratorMetadata, esModuleInterop, experimentalDecorators, forceConsistentCasingInFileNames (+16 more)
 
 ### Community 8 - "scripts"
-Cohesion: 0.15
-Nodes (13): scripts, build, db:init, db:reset, db:seed-admin, db:seed-experiences, format, lint (+5 more)
+Cohesion: 0.13
+Nodes (15): scripts, build, db:init, db:reset, db:seed-admin, db:seed-experiences, format, lint (+7 more)
 
 ### Community 9 - "exclude"
 Cohesion: 0.20
@@ -182,8 +202,8 @@ Cohesion: 0.40
 Nodes (4): collection, compilerOptions, deleteOutDir, sourceRoot
 
 ### Community 13 - "StockCategory"
-Cohesion: 0.10
-Nodes (23): StockCategory, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, CreateStockCategoryDto (+15 more)
+Cohesion: 0.09
+Nodes (25): StockCategory, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, CreateStockCategoryDto (+17 more)
 
 ### Community 14 - "dependencies"
 Cohesion: 0.22
@@ -191,27 +211,19 @@ Nodes (9): adm-zip, class-validator, cookie-parser, joi, dependencies, adm-zip, 
 
 ### Community 17 - "trackings.service.ts"
 Cohesion: 0.06
-Nodes (42): ALLOWED_MIME_TYPES, buildImageMemoryMulterOptions(), buildImageMulterOptions(), buildKmzMemoryMulterOptions(), imageFileFilter(), kmzFileFilter(), logger, MAX_UPLOAD_SIZE_BYTES (+34 more)
+Nodes (45): collectDescriptions(), collectLineStrings(), collectTimestamps(), computeStats(), dedupeDescriptionLines(), findFirstPlacemarkName(), haversineMeters(), htmlToPlainText() (+37 more)
 
-### Community 18 - "Distanterra API"
-Cohesion: 0.11
-Nodes (18): 1. Prerequisites, 2. Install dependencies, 3. Configure environment variables, 4. Create the database schema, 5. Create the admin account, 6. (Optional) Migrate the original hardcoded experiences, 7. Run the API, API overview (+10 more)
+### Community 31 - "upload-targets.ts"
+Cohesion: 0.12
+Nodes (26): dryRun, main(), recalculateAll, dryRun, main(), moveInto(), assertSafeRelativePath(), isInsideRoot() (+18 more)
 
-### Community 19 - "app.module.ts"
-Cohesion: 0.09
-Nodes (21): CampaignsModule, Module, FriendlyThrottlerGuard, Injectable, envValidationSchema, DatabaseModule, Module, ExperiencesModule (+13 more)
-
-### Community 31 - "campaigns.module.ts"
-Cohesion: 0.21
-Nodes (9): CampaignGuide, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn (+1 more)
-
-### Community 33 - "campaigns.service.ts"
-Cohesion: 0.05
-Nodes (50): CampaignExportService, HEADER_FILL, HEADER_FONT, Injectable, CampaignsController, Body, Controller, Delete (+42 more)
+### Community 33 - "CampaignsService"
+Cohesion: 0.15
+Nodes (14): CampaignsController, Body, Controller, Delete, Get, Param, Post, Put (+6 more)
 
 ### Community 38 - "stock-items.service.ts"
-Cohesion: 0.15
-Nodes (15): CreateStockItemDto, IsBoolean, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min (+7 more)
+Cohesion: 0.13
+Nodes (17): CreateStockItemDto, IsBoolean, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min (+9 more)
 
 ### Community 40 - "CampaignExpense"
 Cohesion: 0.06
@@ -226,16 +238,20 @@ Cohesion: 0.08
 Nodes (28): CompaniesController, Body, Controller, Delete, Get, Param, Post, Put (+20 more)
 
 ### Community 43 - "campaign-pack-animals.service.ts"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (18): AssignPackAnimalDto, IsDateString, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min (+10 more)
 
-### Community 44 - "CampaignActivityLog"
-Cohesion: 0.05
-Nodes (47): Req, AuthController, LOGIN_THROTTLE_LIMIT, Body, Controller, Get, HttpCode, Post (+39 more)
+### Community 44 - "campaigns.module.ts"
+Cohesion: 0.06
+Nodes (42): CampaignActivityLogsController, Body, Controller, Delete, Param, Post, Put, UseGuards (+34 more)
 
 ### Community 45 - "vehicles.service.ts"
-Cohesion: 0.16
-Nodes (14): CreateVehicleDto, IsBoolean, IsNumber, IsOptional, IsString, MaxLength, Min, Type (+6 more)
+Cohesion: 0.14
+Nodes (16): CreateVehicleDto, IsBoolean, IsNumber, IsOptional, IsString, MaxLength, Min, Type (+8 more)
+
+### Community 47 - "EmployeeInsurancePolicy"
+Cohesion: 0.09
+Nodes (23): saveRawFile(), EmployeeInsurancePolicy, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne (+15 more)
 
 ### Community 48 - "package.json"
 Cohesion: 0.25
@@ -243,7 +259,7 @@ Nodes (7): description, engines, node, license, name, private, version
 
 ### Community 52 - "PuntoInteres"
 Cohesion: 0.08
-Nodes (30): IsLatitude, IsLongitude, CategoriaPuntoInteres, CATEGORIAS_PUNTO_INTERES, PuntoInteres, Column, CreateDateColumn, Entity (+22 more)
+Nodes (32): IsLatitude, IsLongitude, CategoriaPuntoInteres, CATEGORIAS_PUNTO_INTERES, PuntoInteres, Column, CreateDateColumn, Entity (+24 more)
 
 ### Community 53 - "campaign-vehicles.service.ts"
 Cohesion: 0.15
@@ -253,89 +269,173 @@ Nodes (14): AssignVehicleDto, IsDateString, IsInt, IsNumber, IsOptional, IsStrin
 Cohesion: 0.16
 Nodes (12): CampaignVehiclesService, Injectable, InjectRepository, CampaignVehicle, Column, CreateDateColumn, DeleteDateColumn, Entity (+4 more)
 
+### Community 55 - "EmployeeMedicalExam"
+Cohesion: 0.10
+Nodes (25): EmployeeMedicalExam, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn (+17 more)
+
+### Community 56 - "CampaignPackAnimalsController"
+Cohesion: 0.21
+Nodes (8): CampaignPackAnimalsController, Body, Controller, Delete, Param, Post, Put, UseGuards
+
+### Community 57 - "campaign-guides.service.ts"
+Cohesion: 0.13
+Nodes (16): AssignGuideDto, IsDateString, IsInt, IsNumber, IsOptional, IsString, Min, Type (+8 more)
+
 ### Community 58 - "CampaignVehiclesController"
 Cohesion: 0.21
 Nodes (8): CampaignVehiclesController, Body, Controller, Delete, Param, Post, Put, UseGuards
 
-### Community 59 - "CampaignPackAnimalsController"
-Cohesion: 0.21
-Nodes (8): CampaignPackAnimalsController, Body, Controller, Delete, Param, Post, Put, UseGuards
+### Community 59 - "employees.service.ts"
+Cohesion: 0.12
+Nodes (20): EMPLOYMENT_STATUSES, EmploymentStatus, CreateEmployeeDto, IsBoolean, IsDateString, IsIn, IsNumber, IsOptional (+12 more)
 
 ### Community 62 - "Vehicle"
 Cohesion: 0.22
 Nodes (8): Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Vehicle, InjectRepository
 
-### Community 64 - "CampaignPackAnimal"
-Cohesion: 0.18
-Nodes (10): InjectRepository, CampaignPackAnimal, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne (+2 more)
+### Community 64 - "FinancialDocument"
+Cohesion: 0.09
+Nodes (21): FinancialDocument, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany (+13 more)
 
 ### Community 65 - "VehiclesController"
 Cohesion: 0.22
 Nodes (7): Controller, Delete, Get, Param, Query, UseGuards, VehiclesController
 
-### Community 67 - "Admin"
+### Community 67 - "campaign-export.service.ts"
 Cohesion: 0.25
-Nodes (7): InjectRepository, Admin, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn
+Nodes (5): CampaignExportService, HEADER_FILL, HEADER_FONT, Injectable, campaignStatusLabel()
 
-### Community 70 - "AssignGuideDto"
-Cohesion: 0.25
-Nodes (8): AssignGuideDto, IsDateString, IsInt, IsNumber, IsOptional, IsString, Min, Type
-
-### Community 72 - "CampaignStockItem"
-Cohesion: 0.14
-Nodes (13): CampaignStockService, Injectable, InjectRepository, InjectRepository, CampaignStockItem, Column, CreateDateColumn, DeleteDateColumn (+5 more)
-
-### Community 73 - "UpdateCampaignGuideDto"
-Cohesion: 0.25
-Nodes (8): IsDateString, IsInt, IsNumber, IsOptional, IsString, Min, Type, UpdateCampaignGuideDto
-
-### Community 74 - "CampaignGuidesService"
-Cohesion: 0.15
-Nodes (11): CampaignGuidesController, Body, Controller, Delete, Param, Post, Put, UseGuards (+3 more)
-
-### Community 75 - "Campaign"
-Cohesion: 0.22
-Nodes (9): Campaign, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn (+1 more)
-
-### Community 76 - ".assertCampaignEditable"
-Cohesion: 0.39
-Nodes (3): CampaignPackAnimalsService, Injectable, validateAssignmentDateRange()
-
-### Community 77 - "main.ts"
-Cohesion: 0.40
-Nodes (3): AppModule, Module, logger
-
-### Community 78 - "CampaignStockController"
-Cohesion: 0.21
-Nodes (8): CampaignStockController, Body, Controller, Delete, Param, Post, Put, UseGuards
-
-### Community 80 - "StockItem"
+### Community 68 - "StockItem"
 Cohesion: 0.18
 Nodes (10): StockItem, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn (+2 more)
 
-### Community 81 - "StockItemsController"
+### Community 69 - "CreateFinancialDocumentDto"
+Cohesion: 0.18
+Nodes (11): CreateFinancialDocumentDto, IsDateString, IsIn, IsInt, IsNumber, IsOptional, IsString, Matches (+3 more)
+
+### Community 70 - "EmployeesService"
+Cohesion: 0.12
+Nodes (13): EmployeesController, Body, Controller, Delete, Get, Param, Post, Put (+5 more)
+
+### Community 72 - "CampaignStockItem"
+Cohesion: 0.10
+Nodes (20): CampaignStockController, Body, Controller, Delete, Param, Post, Put, UseGuards (+12 more)
+
+### Community 73 - "service-records.service.ts"
+Cohesion: 0.16
+Nodes (12): IsOptional, IsString, Matches, UpdateServiceRecordDto, ServiceRecordsController, Body, Controller, Get (+4 more)
+
+### Community 74 - "CampaignGuide"
+Cohesion: 0.11
+Nodes (17): CampaignGuidesController, Body, Controller, Delete, Param, Post, Put, UseGuards (+9 more)
+
+### Community 75 - "StockItemsController"
 Cohesion: 0.22
 Nodes (7): StockItemsController, Controller, Delete, Get, Param, Query, UseGuards
 
+### Community 76 - "campaigns.util.ts"
+Cohesion: 0.27
+Nodes (11): computeBlendedUnitCost(), computeCampaignStatus(), computeGuideCost(), computeStockItemCost(), computeVehicleCost(), daysBetweenInclusive(), effectiveEndDate(), monthKeyOf() (+3 more)
+
+### Community 77 - ".update"
+Cohesion: 0.15
+Nodes (12): FinancialDocumentsController, Body, Controller, Delete, Get, Param, Post, Put (+4 more)
+
+### Community 78 - "app.module.ts"
+Cohesion: 0.05
+Nodes (42): Req, AppModule, Module, AuthController, LOGIN_THROTTLE_LIMIT, Body, Controller, Get (+34 more)
+
+### Community 80 - "financial-documents.service.ts"
+Cohesion: 0.32
+Nodes (7): DOCUMENT_CURRENCIES, DocumentCurrency, FINANCIAL_DOCUMENT_TYPES, FinancialDocumentType, UpdateFinancialDocumentDto, SUBFOLDER_BY_TYPE, FinancialDocumentView
+
+### Community 81 - "Employee"
+Cohesion: 0.20
+Nodes (9): Employee, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn (+1 more)
+
+### Community 83 - "campaigns.service.ts"
+Cohesion: 0.20
+Nodes (14): CampaignDetail, CreateCampaignDto, IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength (+6 more)
+
+### Community 88 - "PrivateFilesController"
+Cohesion: 0.29
+Nodes (6): SkipThrottle, FilesModule, Module, PrivateFilesController, Controller, UseGuards
+
+### Community 92 - "Campañas"
+Cohesion: 0.11
+Nodes (17): Baqueanos y animales de carga, Bitácora, Campañas, Categorías de stock, Cálculo de costos, Cómo pisar el cálculo, Dos lecturas distintas de la disponibilidad, Empresas (+9 more)
+
+### Community 93 - "file-upload.util.ts"
+Cohesion: 0.22
+Nodes (12): resolveUploadDir(), ALLOWED_MIME_TYPES, buildImageMemoryMulterOptions(), buildImageMulterOptions(), buildKmzMemoryMulterOptions(), buildPdfMemoryMulterOptions(), deleteUploadedFile(), imageFileFilter() (+4 more)
+
+### Community 97 - ".assertCampaignEditable"
+Cohesion: 0.27
+Nodes (4): CampaignGuidesService, Injectable, InjectRepository, validateAssignmentDateRange()
+
+### Community 102 - "JwtAuthGuard"
+Cohesion: 0.30
+Nodes (7): JwtAuthGuard, Injectable, CreateEmployeeInsurancePolicyDto, IsDateString, IsString, MaxLength, UpdateEmployeeInsurancePolicyDto
+
+### Community 103 - "Módulos"
+Cohesion: 0.20
+Nodes (10): Bloques de descripción, Comentarios (testimonios), Contenido bilingüe, Contenido del sitio, Experiencias, Galería, Imágenes (logos), Mensajes de contacto (+2 more)
+
+### Community 104 - "campaigns.types.ts"
+Cohesion: 0.22
+Nodes (9): CampaignActivityLogView, CampaignExpenseMonthSummary, CampaignExpenseView, CampaignGuideView, CampaignPackAnimalView, CampaignStockItemView, CampaignVehicleView, CampaignStatus (+1 more)
+
+### Community 106 - "Referencia de la API"
+Cohesion: 0.22
+Nodes (9): Administración, Archivos, Autenticación, Campañas, Catálogos de campañas, Contenido del sitio, Empleados, Mapa (+1 more)
+
+### Community 107 - "Archivos subidos"
+Cohesion: 0.25
+Nodes (8): Archivos subidos, Dos árboles, según quién puede verlos, El endpoint privado, Las rutas en la base no llevan el prefijo, Límites, Migración desde el layout viejo, Optimización de imágenes, Un detalle de la cookie
+
+### Community 108 - "Autenticación y seguridad"
+Cohesion: 0.29
+Nodes (7): Autenticación y seguridad, Contraseñas, El login está oculto, Flujo de sesión, Otras medidas, Protecciones del formulario de contacto, Rate limiting
+
+### Community 109 - "Despliegue"
+Cohesion: 0.29
+Nodes (7): Despliegue, Orden de despliegue, Pasos, Pendiente: `trust proxy`, Respaldos, Uploads y Nginx, Versiones
+
+### Community 110 - "Distanterra API"
+Cohesion: 0.29
+Nodes (7): Distanterra API, Documentación, Estructura, Puesta en marcha, Qué hace, Scripts, Stack
+
+### Community 111 - "Administración"
+Cohesion: 0.33
+Nodes (5): Administración, Campos, Documentos financieros, El estado no se marca a mano, Estado de servicios
+
+### Community 112 - "Empleados"
+Cohesion: 0.33
+Nodes (6): Cómo se arma el listado, Datos del legajo, Empleados, Exámenes médicos, Pólizas de seguro, Una limitación conocida
+
+### Community 113 - "Mapa"
+Cohesion: 0.22
+Nodes (8): Carga en dos pasos, Datos del archivo, En el panel, Mapa, Métricas del recorrido, Puntos de interés, Reprocesar trackings ya cargados, Trackings
+
 ## Knowledge Gaps
-- **142 isolated node(s):** `collection`, `sourceRoot`, `deleteOutDir`, `name`, `version` (+137 more)
+- **211 isolated node(s):** `collection`, `sourceRoot`, `deleteOutDir`, `name`, `version` (+206 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **42 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `JwtAuthGuard` connect `CampaignActivityLog` to `gallery.controller.ts`, `Experience`, `comments.controller.ts`, `images.controller.ts`, `ContactMessage`, `stock-items.service.ts`, `campaign-stock.service.ts`, `Company`, `campaign-pack-animals.service.ts`, `StockCategory`, `vehicles.service.ts`, `trackings.service.ts`, `PuntoInteres`, `campaign-vehicles.service.ts`, `campaigns.module.ts`?**
-  _High betweenness centrality (0.081) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `AppConfig` to `campaigns.service.ts`, `gallery.controller.ts`, `comments.controller.ts`, `images.controller.ts`, `ContactMessage`, `CampaignStockItem`, `CampaignActivityLog`, `main.ts`, `database.module.ts`, `trackings.service.ts`, `app.module.ts`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
-- **Why does `Campaign` connect `Campaign` to `CampaignPackAnimal`, `campaigns.service.ts`, `Admin`, `CampaignStockItem`, `CampaignExpense`, `Company`, `campaign-pack-animals.service.ts`, `.assertCampaignEditable`, `CampaignActivityLog`, `database.module.ts`, `CampaignVehicle`, `campaigns.module.ts`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `JwtAuthGuard` connect `JwtAuthGuard` to `gallery.controller.ts`, `Experience`, `comments.controller.ts`, `images.controller.ts`, `ContactMessage`, `StockCategory`, `trackings.service.ts`, `upload-targets.ts`, `stock-items.service.ts`, `CampaignExpense`, `campaign-stock.service.ts`, `Company`, `campaign-pack-animals.service.ts`, `campaigns.module.ts`, `vehicles.service.ts`, `PuntoInteres`, `campaign-vehicles.service.ts`, `EmployeeMedicalExam`, `campaign-guides.service.ts`, `employees.service.ts`, `service-records.service.ts`, `app.module.ts`, `financial-documents.service.ts`, `campaigns.service.ts`?**
+  _High betweenness centrality (0.079) - this node is a cross-community bridge._
+- **Why does `AppConfig` connect `app.module.ts` to `CampaignPackAnimal`, `FinancialDocument`, `gallery.controller.ts`, `comments.controller.ts`, `images.controller.ts`, `ContactMessage`, `service-records.service.ts`, `campaigns.module.ts`, `financial-documents.service.ts`, `Employee`, `trackings.service.ts`, `campaigns.service.ts`, `employees.service.ts`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+- **Why does `toFileUrl()` connect `upload-targets.ts` to `gallery.controller.ts`, `comments.controller.ts`, `images.controller.ts`, `EmployeesService`, `service-records.service.ts`, `campaigns.util.ts`, `financial-documents.service.ts`, `trackings.service.ts`, `campaigns.service.ts`, `employees.service.ts`, `FinancialDocumentsService`, `ServiceRecordsService`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **What connects `collection`, `sourceRoot`, `deleteOutDir` to the rest of the system?**
-  _142 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _211 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `CampaignPackAnimal` be split into smaller, more focused modules?**
+  _Cohesion score 0.13725490196078433 - nodes in this community are weakly interconnected._
 - **Should `gallery.controller.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.062310949788263764 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.059322033898305086 - nodes in this community are weakly interconnected._
 - **Should `Experience` be split into smaller, more focused modules?**
-  _Cohesion score 0.062146892655367235 - nodes in this community are weakly interconnected._
-- **Should `comments.controller.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07256894049346879 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.059227921734531994 - nodes in this community are weakly interconnected._

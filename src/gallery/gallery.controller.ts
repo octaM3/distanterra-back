@@ -21,7 +21,7 @@ import { GalleryImage } from '@/database/entities/gallery-image.entity';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { buildImageMemoryMulterOptions } from '@/common/utils/file-upload.util';
 import { optimizeAndSaveImage } from '@/common/utils/image-optimizer.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
 import { GalleryPaginationDto } from './dto/gallery-pagination.dto';
 import { UpdateGalleryImageDto } from './dto/update-gallery-image.dto';
@@ -49,7 +49,7 @@ export class GalleryController {
   private toResponse(image: GalleryImage): GalleryImageResponse {
     const apiUrl = this.configService.get('apiUrl', { infer: true });
     const { filePath, ...rest } = image;
-    return { ...rest, url: toPublicFileUrl(apiUrl, filePath) as string };
+    return { ...rest, url: toFileUrl(apiUrl, filePath) as string };
   }
 
   // ---- Endpoints públicos ----

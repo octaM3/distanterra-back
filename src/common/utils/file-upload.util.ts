@@ -4,6 +4,7 @@ import { unlink, writeFile } from 'fs/promises';
 import { diskStorage, memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { resolveUploadDir, resolveUploadPath } from '@/common/uploads/upload-targets';
 
 const logger = new Logger('FileUpload');
 
@@ -27,9 +28,7 @@ const imageFileFilter = (
   callback: (error: Error | null, acceptFile: boolean) => void,
 ) => {
   if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-    logger.warn(
-      `Tipo de archivo rechazado: "${file.mimetype}" (archivo: "${file.originalname}")`,
-    );
+    logger.warn(`Tipo de archivo rechazado: "${file.mimetype}" (archivo: "${file.originalname}")`);
     callback(
       new BadRequestException(
         'Tipo de archivo no permitido. Solo se aceptan imagenes (jpeg, png, webp, gif, svg).',
@@ -43,12 +42,12 @@ const imageFileFilter = (
 
 /**
  * Construye las opciones de multer para guardar imágenes en disco local,
- * dentro de UPLOADS_DIR/<subcarpeta>, con un nombre de archivo aleatorio
- * (nunca se usa el nombre original del cliente).
+ * dentro del árbol público o privado que le corresponda a la subcarpeta (ver
+ * upload-targets.ts), con un nombre de archivo aleatorio (nunca se usa el
+ * nombre original del cliente).
  */
 export function buildImageMulterOptions(subfolder: string) {
-  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
-  const targetDir = join(uploadsDir, subfolder);
+  const targetDir = resolveUploadDir(subfolder);
 
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir, { recursive: true });
@@ -142,8 +141,7 @@ export function buildKmzMemoryMulterOptions() {
  * no dejar huérfano el anterior. No falla si el archivo ya no está.
  */
 export async function deleteUploadedFile(relativePath: string): Promise<void> {
-  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
-  const fullPath = join(uploadsDir, relativePath);
+  const fullPath = resolveUploadPath(relativePath);
   try {
     await unlink(fullPath);
   } catch (err) {
@@ -161,8 +159,7 @@ export async function deleteUploadedFile(relativePath: string): Promise<void> {
  * aunque ya se hayan extraído sus puntos.
  */
 export async function saveRawFile(file: Express.Multer.File, subfolder: string): Promise<string> {
-  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
-  const targetDir = join(uploadsDir, subfolder);
+  const targetDir = resolveUploadDir(subfolder);
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir, { recursive: true });
     logger.log(`Directorio de uploads creado: ${targetDir}`);

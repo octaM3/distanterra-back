@@ -18,7 +18,7 @@ import { AppConfig } from '@/config/configuration';
 import { Comment } from '@/database/entities/comment.entity';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { buildImageMulterOptions } from '@/common/utils/file-upload.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -39,7 +39,7 @@ export class CommentsController {
   /** Transforma la entidad reemplazando la ruta relativa del archivo por una URL pública completa. */
   private toResponse(comment: Comment): CommentResponse {
     const apiUrl = this.configService.get('apiUrl', { infer: true });
-    return { ...comment, photoUrl: toPublicFileUrl(apiUrl, comment.photoUrl) };
+    return { ...comment, photoUrl: toFileUrl(apiUrl, comment.photoUrl) };
   }
 
   // ---- Endpoints públicos ----
@@ -70,7 +70,9 @@ export class CommentsController {
     @Body() dto: CreateCommentDto,
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<CommentResponse> {
-    this.logger.log(`POST /api/admin/comments - cliente: "${dto.clientName}", foto: ${file ? file.filename : 'ninguna'}`);
+    this.logger.log(
+      `POST /api/admin/comments - cliente: "${dto.clientName}", foto: ${file ? file.filename : 'ninguna'}`,
+    );
     const photoUrl = file ? `comments/${file.filename}` : null;
     const comment = await this.commentsService.create(dto, photoUrl);
     return this.toResponse(comment);
@@ -84,7 +86,9 @@ export class CommentsController {
     @Body() dto: UpdateCommentDto,
     @UploadedFile() file: Express.Multer.File | undefined,
   ): Promise<CommentResponse> {
-    this.logger.log(`PUT /api/admin/comments/${id}${file ? ` con nueva foto: ${file.filename}` : ''}`);
+    this.logger.log(
+      `PUT /api/admin/comments/${id}${file ? ` con nueva foto: ${file.filename}` : ''}`,
+    );
     const photoUrl = file ? `comments/${file.filename}` : undefined;
     const comment = await this.commentsService.update(id, dto, photoUrl);
     return this.toResponse(comment);

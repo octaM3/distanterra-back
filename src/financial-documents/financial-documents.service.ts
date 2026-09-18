@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import { AppConfig } from '@/config/configuration';
 import { deleteUploadedFile } from '@/common/utils/file-upload.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import {
   DocumentCurrency,
   FinancialDocument,
@@ -81,7 +81,7 @@ export class FinancialDocumentsService {
       currency: doc.currency,
       description: doc.description,
       notes: doc.notes,
-      fileUrl: toPublicFileUrl(apiUrl, doc.filePath),
+      fileUrl: toFileUrl(apiUrl, doc.filePath),
       creditNotesCount,
       createdAt: doc.createdAt,
     };

@@ -4,6 +4,7 @@ import { writeFile } from 'fs/promises';
 import { extname, join } from 'path';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import { resolveUploadDir } from '@/common/uploads/upload-targets';
 
 const logger = new Logger('ImageOptimizer');
 
@@ -18,15 +19,15 @@ const WEBP_QUALITY = 82;
  * Redimensiona la imagen (si hace falta) preservando el aspect ratio -sin
  * recortar ni deformar horizontales ni verticales- para que el lado más
  * largo entre en MAX_DIMENSION_PX, y la recomprime como WebP. Después la
- * guarda en UPLOADS_DIR/<subfolder> con un nombre aleatorio y devuelve la
- * ruta relativa para persistir en la base de datos.
+ * guarda en el árbol público o privado que le corresponda a la subcarpeta
+ * (ver upload-targets.ts) con un nombre aleatorio, y devuelve la ruta
+ * relativa para persistir en la base de datos.
  */
 export async function optimizeAndSaveImage(
   file: Express.Multer.File,
   subfolder: string,
 ): Promise<string> {
-  const uploadsDir = process.env.UPLOADS_DIR ?? './uploads';
-  const targetDir = join(uploadsDir, subfolder);
+  const targetDir = resolveUploadDir(subfolder);
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir, { recursive: true });
     logger.log(`Directorio de uploads creado: ${targetDir}`);

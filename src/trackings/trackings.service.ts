@@ -6,8 +6,8 @@ import { join } from 'path';
 import { Repository } from 'typeorm';
 import { AppConfig } from '@/config/configuration';
 import { saveRawFile } from '@/common/utils/file-upload.util';
-import { parseKmzTrack } from '@/common/utils/kml-parser.util';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { TrackStats, parseKmzTrack } from '@/common/utils/kml-parser.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { Tracking } from '@/database/entities/tracking.entity';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
 import { UpdateTrackingDto } from './dto/update-tracking.dto';
@@ -18,6 +18,12 @@ export interface TrackingView {
   id: number;
   nombre: string;
   descripcion: string | null;
+  /** Hexadecimal "#rrggbb", o null si nunca se eligió uno (el front asigna el automático). */
+  color: string | null;
+  /** Métricas calculadas del recorrido. Null en los trackings todavía sin reprocesar. */
+  stats: TrackStats | null;
+  /** Datos crudos del archivo (tiempo en movimiento, velocidad máxima, clima). */
+  deviceInfo: string | null;
   points: [number, number][];
   fileUrl: string | null;
   createdAt: Date;
@@ -39,8 +45,11 @@ export class TrackingsService {
       id: tracking.id,
       nombre: tracking.nombre,
       descripcion: tracking.descripcion,
+      color: tracking.color,
+      stats: tracking.stats,
+      deviceInfo: tracking.deviceInfo,
       points: tracking.points,
-      fileUrl: toPublicFileUrl(apiUrl, tracking.filePath),
+      fileUrl: toFileUrl(apiUrl, tracking.filePath),
       createdAt: tracking.createdAt,
     };
   }
@@ -72,7 +81,7 @@ export class TrackingsService {
       throw new BadRequestException('Debe subir un archivo .kmz.');
     }
 
-    const { points, suggestedName } = parseKmzTrack(file.buffer);
+    const { points, suggestedName, stats, deviceInfo } = parseKmzTrack(file.buffer);
     this.logger.log(
       `Parseando tracking "${dto.nombre}": ${points.length} punto(s)` +
         (suggestedName ? ` (nombre sugerido del KML: "${suggestedName}")` : ''),
@@ -83,6 +92,9 @@ export class TrackingsService {
     const tracking = this.trackingRepository.create({
       nombre: dto.nombre,
       descripcion: dto.descripcion ?? null,
+      color: dto.color ?? null,
+      stats,
+      deviceInfo,
       points,
       filePath,
     });
@@ -95,6 +107,7 @@ export class TrackingsService {
     const tracking = await this.findEntityOrFail(id);
     if (dto.nombre !== undefined) tracking.nombre = dto.nombre;
     if (dto.descripcion !== undefined) tracking.descripcion = dto.descripcion;
+    if (dto.color !== undefined) tracking.color = dto.color;
     const saved = await this.trackingRepository.save(tracking);
     this.logger.log(`Tracking id=${id} actualizado correctamente`);
     return this.toView(saved);

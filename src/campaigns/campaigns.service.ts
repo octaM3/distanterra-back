@@ -10,7 +10,7 @@ import { CampaignGuide } from '@/database/entities/campaign-guide.entity';
 import { CampaignPackAnimal } from '@/database/entities/campaign-pack-animal.entity';
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
 import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { ServiceRecordsService } from '@/service-records/service-records.service';
 import { CampaignDetail, CampaignExpenseMonthSummary, CampaignListItem } from './campaigns.types';
 import {
@@ -257,7 +257,7 @@ export class CampaignsService {
       amountUsd: e.amountUsd,
       amountArs: e.amountArs,
       expenseDate: e.expenseDate,
-      invoiceUrl: toPublicFileUrl(apiUrl, e.invoiceImagePath),
+      invoiceUrl: toFileUrl(apiUrl, e.invoiceImagePath),
       invoiceType: e.invoiceType,
       invoiceNumber: e.invoiceNumber,
       businessName: e.businessName,

@@ -3,12 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '@/config/configuration';
-import { toPublicFileUrl } from '@/common/utils/public-url.util';
+import { toFileUrl } from '@/common/utils/file-url.util';
 import { Campaign } from '@/database/entities/campaign.entity';
-import {
-  DocumentCurrency,
-  FinancialDocument,
-} from '@/database/entities/financial-document.entity';
+import { DocumentCurrency, FinancialDocument } from '@/database/entities/financial-document.entity';
 import { ServiceRecord } from '@/database/entities/service-record.entity';
 import { UpdateServiceRecordDto } from './dto/update-service-record.dto';
 
@@ -106,14 +103,14 @@ export class ServiceRecordsService {
       invoiceSent: Boolean(invoice),
       invoiceSentAt: invoice?.documentDate ?? null,
       invoiceDocumentId: invoice?.id ?? null,
-      invoiceFileUrl: toPublicFileUrl(apiUrl, invoice?.filePath ?? null),
+      invoiceFileUrl: toFileUrl(apiUrl, invoice?.filePath ?? null),
       invoiceNumber: invoice?.documentNumber ?? null,
       invoiceAmount: invoice?.amount ?? null,
       invoiceCurrency: invoice?.currency ?? null,
       paymentReceived: Boolean(receipt),
       paymentReceivedAt: receipt?.documentDate ?? null,
       receiptDocumentId: receipt?.id ?? null,
-      receiptFileUrl: toPublicFileUrl(apiUrl, receipt?.filePath ?? null),
+      receiptFileUrl: toFileUrl(apiUrl, receipt?.filePath ?? null),
       receiptAmount: receipt?.amount ?? null,
       receiptCurrency: receipt?.currency ?? null,
       creditNotesCount,
