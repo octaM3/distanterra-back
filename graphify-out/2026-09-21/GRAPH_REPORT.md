@@ -1,11 +1,11 @@
 # Graph Report - distanterra-back  (2026-09-21)
 
 ## Corpus Check
-- 208 files · ~57,270 words
+- 208 files · ~57,213 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1710 nodes · 3482 edges · 118 communities (75 shown, 43 thin omitted)
+- 1710 nodes · 3482 edges · 119 communities (76 shown, 43 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 144 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -67,7 +67,7 @@
 - campaign-vehicles.service.ts
 - CampaignVehicle
 - EmployeeMedicalExam
-- AppConfig
+- Admin
 - app.module.ts
 - CampaignVehiclesController
 - employees.service.ts
@@ -103,10 +103,11 @@
 - prettier
 - @types/passport-jwt
 - Campañas
-- eslint-plugin-prettier
+- LoginDto
 - ts-loader
 - ServiceRecordsService
 - @types/uuid
+- @nestjs/cli
 - @types/bcrypt
 - Los catálogos
 - FinancialDocumentsService
@@ -156,7 +157,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (118 total, 43 thin omitted)
+## Communities (119 total, 43 thin omitted)
 
 ### Community 0 - "budget-pdf.service.ts"
 Cohesion: 0.14
@@ -184,7 +185,7 @@ Nodes (26): CONTACT_THROTTLE_LIMIT, ContactMessagesController, Body, Controller,
 
 ### Community 6 - "devDependencies"
 Cohesion: 0.12
-Nodes (17): eslint, @nestjs/cli, devDependencies, eslint, @nestjs/cli, ts-node, tsconfig-paths, @types/cookie-parser (+9 more)
+Nodes (17): eslint, eslint-plugin-prettier, devDependencies, eslint, eslint-plugin-prettier, ts-node, tsconfig-paths, @types/cookie-parser (+9 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.08
@@ -290,9 +291,9 @@ Nodes (12): CampaignVehiclesService, Injectable, InjectRepository, CampaignVehic
 Cohesion: 0.09
 Nodes (25): EmployeeMedicalExam, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn (+17 more)
 
-### Community 56 - "AppConfig"
-Cohesion: 0.17
-Nodes (11): InjectRepository, JwtStrategy, Injectable, InjectRepository, AppConfig, Admin, Column, CreateDateColumn (+3 more)
+### Community 56 - "Admin"
+Cohesion: 0.20
+Nodes (8): InjectRepository, InjectRepository, Admin, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn
 
 ### Community 57 - "app.module.ts"
 Cohesion: 0.05
@@ -375,8 +376,8 @@ Cohesion: 0.20
 Nodes (9): Employee, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn (+1 more)
 
 ### Community 82 - "JwtAuthGuard"
-Cohesion: 0.22
-Nodes (9): LOGIN_THROTTLE_LIMIT, CurrentAdmin, LoginDto, IsString, MinLength, JwtAuthGuard, Injectable, JwtPayload (+1 more)
+Cohesion: 0.23
+Nodes (9): LOGIN_THROTTLE_LIMIT, CurrentAdmin, JwtAuthGuard, Injectable, JwtPayload, JwtStrategy, Injectable, AppConfig (+1 more)
 
 ### Community 83 - "campaigns.service.ts"
 Cohesion: 0.12
@@ -389,6 +390,10 @@ Nodes (11): InjectRepository, InjectRepository, CampaignPackAnimal, Column, Crea
 ### Community 92 - "Campañas"
 Cohesion: 0.13
 Nodes (14): Bitácora, Campañas, Ciclo de vida, Dos lecturas distintas de la disponibilidad, El limbo de `esperando_finalizacion`, El PDF, Estados, Exportación a Excel (+6 more)
+
+### Community 93 - "LoginDto"
+Cohesion: 0.50
+Nodes (3): LoginDto, IsString, MinLength
 
 ### Community 99 - "Los catálogos"
 Cohesion: 0.40
@@ -448,7 +453,7 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `JwtAuthGuard` connect `JwtAuthGuard` to `gallery.controller.ts`, `Experience`, `comments.controller.ts`, `ContactMessage`, `database.module.ts`, `trackings.service.ts`, `campaigns.module.ts`, `file-upload.util.ts`, `campaign-stock.service.ts`, `Company`, `campaign-pack-animals.service.ts`, `vehicles.service.ts`, `EmployeeInsurancePolicy`, `PuntoInteres`, `campaign-vehicles.service.ts`, `EmployeeMedicalExam`, `employees.service.ts`, `CreateStockItemDto`, `campaign-activity-logs.controller.ts`, `service-records.service.ts`, `financial-documents.service.ts`, `campaigns.service.ts`?**
   _High betweenness centrality (0.097) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `AppConfig` to `FinancialDocument`, `gallery.controller.ts`, `comments.controller.ts`, `Image`, `ContactMessage`, `employees.service.ts`, `service-records.service.ts`, `database.module.ts`, `financial-documents.service.ts`, `Employee`, `JwtAuthGuard`, `campaigns.service.ts`, `trackings.service.ts`, `CampaignPackAnimal`, `app.module.ts`, `.login`?**
+- **Why does `AppConfig` connect `JwtAuthGuard` to `FinancialDocument`, `gallery.controller.ts`, `comments.controller.ts`, `Image`, `ContactMessage`, `CampaignPackAnimal`, `employees.service.ts`, `service-records.service.ts`, `database.module.ts`, `financial-documents.service.ts`, `Employee`, `trackings.service.ts`, `campaigns.service.ts`, `Admin`, `app.module.ts`, `.login`?**
   _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Why does `toFileUrl()` connect `file-upload.util.ts` to `gallery.controller.ts`, `comments.controller.ts`, `FinancialDocumentsService`, `Image`, `EmployeesService`, `service-records.service.ts`, `campaigns.util.ts`, `financial-documents.service.ts`, `trackings.service.ts`, `JwtAuthGuard`, `campaigns.service.ts`, `employees.service.ts`, `ServiceRecordsService`?**
   _High betweenness centrality (0.040) - this node is a cross-community bridge._

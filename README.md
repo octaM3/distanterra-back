@@ -77,10 +77,22 @@ La API queda escuchando en `PORT` (3001 por defecto) bajo el prefijo `/api`, por
 | `npm run uploads:split` | Migración única del layout de uploads. Ver [docs/uploads.md](docs/uploads.md) |
 | `npm run trackings:backfill-stats` | Recalcula las métricas de los trackings ya cargados. Ver [docs/mapa.md](docs/mapa.md) |
 
-Sobre el esquema: **no hay migraciones incrementales**. Los `sql/*.sql` solo crean
-(`CREATE ... IF NOT EXISTS`), así que agregar una columna a una tabla que ya existe
-implica editar el `.sql` correspondiente y aplicar el cambio a mano en la base, o
-resetear todo en desarrollo.
+Sobre el esquema: **no hay migraciones incrementales, y hay un archivo por tabla**. Los
+`sql/*.sql` solo crean (`CREATE ... IF NOT EXISTS`) y cada uno define su tabla entera,
+con todas sus columnas, constraints e índices. Van numerados en secuencia corrida, y el
+número solo fija el orden de ejecución: una tabla va después de aquellas a las que
+referencia. Por eso los comentarios se refieren a otras tablas por su nombre y nunca por
+el número de archivo, que cambia al renumerar.
+
+Agregar una columna es editar el `.sql` de esa tabla. Como `CREATE TABLE IF NOT EXISTS`
+no toca una tabla que ya existe, el cambio hay que aplicarlo aparte: en desarrollo, con
+`npm run db:reset -- --yes && npm run db:init`; en una base con datos que no se pueden
+perder,
+con el `ALTER TABLE` a mano.
+
+Lo que **no** hay que hacer es dejar el `ALTER` como un `.sql` nuevo: esos archivos se
+acumulan, la definición de una tabla termina repartida en cinco lugares y una base
+recién creada pasa por estados intermedios que no existen en ningún lado.
 
 ## Estructura
 
@@ -127,7 +139,7 @@ distanterra-back/
 | [Autenticación y seguridad](docs/autenticacion-y-seguridad.md) | Login oculto, sesión por cookie, rate limiting, protecciones contra abuso |
 | [Archivos subidos](docs/uploads.md) | El árbol público/privado, quién ve qué, optimización de imágenes |
 | [Contenido del sitio](docs/contenido-web.md) | Experiencias, comentarios, galería, logos, formulario de contacto, bilingüismo |
-| [Campañas](docs/campanas.md) | Campañas, stock, vehículos, baqueanos, animales de carga, gastos, costos |
+| [Campañas](docs/campanas.md) | Campañas, presupuestos, stock, vehículos, baqueanos, animales de carga, gastos, costos |
 | [Empleados](docs/empleados.md) | Legajos, exámenes médicos, pólizas de seguro, datos bancarios |
 | [Administración](docs/administracion.md) | Documentos financieros y estado de facturación y cobro |
 | [Mapa](docs/mapa.md) | Puntos de interés y trackings GPS |

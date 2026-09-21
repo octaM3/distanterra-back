@@ -14,10 +14,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CAMPAIGN_KINDS, CampaignKind } from '@/database/entities/campaign.entity';
+import {
+  CAMPAIGN_APPROVAL_STATUSES,
+  CAMPAIGN_KINDS,
+  CampaignApprovalStatus,
+  CampaignKind,
+} from '@/database/entities/campaign.entity';
 import { CurrentAdmin } from '@/auth/current-admin.decorator';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { JwtPayload } from '@/auth/jwt-payload.interface';
+import { BudgetPdfService } from './budget-pdf.service';
 import { CampaignExportService } from './campaign-export.service';
 import { CampaignDetail, CampaignListItem } from './campaigns.types';
 import { CampaignsService } from './campaigns.service';
@@ -33,15 +39,60 @@ export class CampaignsController {
   constructor(
     private readonly campaignsService: CampaignsService,
     private readonly campaignExportService: CampaignExportService,
+    private readonly budgetPdfService: BudgetPdfService,
   ) {}
 
   @Get()
-  async findAll(@Query('kind') kind?: string): Promise<CampaignListItem[]> {
+  async findAll(
+    @Query('kind') kind?: string,
+    @Query('approvalStatus') approvalStatus?: string,
+  ): Promise<CampaignListItem[]> {
     this.logger.debug(`GET /api/admin/campaigns${kind ? `?kind=${kind}` : ''}`);
     if (kind && !CAMPAIGN_KINDS.includes(kind as CampaignKind)) {
       throw new BadRequestException(`Tipo inválido: ${kind}`);
     }
-    return this.campaignsService.findAll(kind as CampaignKind | undefined);
+    if (
+      approvalStatus &&
+      !CAMPAIGN_APPROVAL_STATUSES.includes(approvalStatus as CampaignApprovalStatus)
+    ) {
+      throw new BadRequestException(`Estado de aprobación inválido: ${approvalStatus}`);
+    }
+    return this.campaignsService.findAll(
+      kind as CampaignKind | undefined,
+      approvalStatus as CampaignApprovalStatus | undefined,
+    );
+  }
+
+  /**
+   * Qué cosas del presupuesto ya no están disponibles. La pantalla lo consulta
+   * antes de ofrecer el botón de aprobar, para avisar en vez de que el
+   * conflicto aparezca como un error recién al apretarlo.
+   */
+  @Get(':id/approval-conflicts')
+  async approvalConflicts(@Param('id', ParseIntPipe) id: number): Promise<{ conflicts: string[] }> {
+    this.logger.debug(`GET /api/admin/campaigns/${id}/approval-conflicts`);
+    return { conflicts: await this.campaignsService.getApprovalConflicts(id) };
+  }
+
+  @Post(':id/approve')
+  async approve(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('force') force?: string,
+  ): Promise<CampaignListItem> {
+    this.logger.log(`POST /api/admin/campaigns/${id}/approve`);
+    return this.campaignsService.approve(id, force === 'true');
+  }
+
+  @Post(':id/reject')
+  async reject(@Param('id', ParseIntPipe) id: number): Promise<CampaignListItem> {
+    this.logger.log(`POST /api/admin/campaigns/${id}/reject`);
+    return this.campaignsService.reject(id);
+  }
+
+  @Post(':id/reopen')
+  async reopen(@Param('id', ParseIntPipe) id: number): Promise<CampaignListItem> {
+    this.logger.log(`POST /api/admin/campaigns/${id}/reopen`);
+    return this.campaignsService.reopen(id);
   }
 
   @Get(':id')
@@ -96,6 +147,19 @@ export class CampaignsController {
     const { buffer, filename } = await this.campaignExportService.buildWorkbook(id);
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+    res.send(buffer);
+  }
+
+  /** El presupuesto en PDF, el que se le manda a la empresa. */
+  @Get(':id/budget.pdf')
+  async budgetPdf(@Param('id', ParseIntPipe) id: number, @Res() res: Response): Promise<void> {
+    this.logger.log(`GET /api/admin/campaigns/${id}/budget.pdf`);
+    const { buffer, filename } = await this.budgetPdfService.buildPdf(id);
+    res.set({
+      'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${filename}"`,
       'Content-Length': buffer.length,
     });

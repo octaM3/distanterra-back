@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entity';
+import { RESERVING_APPROVAL_STATUS } from '@/database/entities/campaign.entity';
 import { StockCategory } from '@/database/entities/stock-category.entity';
 import { StockItem } from '@/database/entities/stock-item.entity';
 import { todayLocalDateString } from '@/common/utils/date.util';
@@ -31,6 +32,12 @@ export interface StockItemOccupiedRange {
   quantity: number;
   campaignId: number;
   campaignName: string;
+  /**
+   * La asignación es de un presupuesto sin aprobar: se informa para que al
+   * armar otra campaña se vea que hay algo pedido en esos días, pero NO
+   * descuenta disponibilidad (ver RESERVING_APPROVAL_STATUS).
+   */
+  isBudget: boolean;
 }
 
 @Injectable()
@@ -64,6 +71,9 @@ export class StockItemsService {
       .where('csi.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .andWhere('c.approval_status = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .groupBy('csi.stock_item_id')
       .getRawMany<{ stockItemId: number; locked: string }>();
 
@@ -92,6 +102,9 @@ export class StockItemsService {
       .where('csi.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .andWhere('c.approval_status = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .andWhere('csi.start_date <= :today', { today })
       .andWhere('csi.end_date >= :today', { today })
       .groupBy('csi.stock_item_id')
@@ -179,6 +192,9 @@ export class StockItemsService {
       .andWhere('csi.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .andWhere('c.approval_status = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .andWhere('csi.start_date <= :endDate', { endDate })
       .andWhere('csi.end_date >= :startDate', { startDate });
 
@@ -211,6 +227,10 @@ export class StockItemsService {
       .andWhere('csi.deletedAt IS NULL')
       .andWhere('campaign.deletedAt IS NULL')
       .andWhere('campaign.finishedAt IS NULL')
+      // Los presupuestos entran a propósito: el calendario los muestra como
+      // reserva blanda. Quien consume esto tiene que descartarlos al contar
+      // cantidad ocupada (ver isBudget).
+      .andWhere('campaign.approvalStatus != :rejected', { rejected: 'rechazada' })
       .orderBy('csi.startDate', 'ASC');
 
     if (excludeCampaignStockItemId) {
@@ -224,6 +244,7 @@ export class StockItemsService {
       quantity: row.quantity,
       campaignId: row.campaignId,
       campaignName: row.campaign.name,
+      isBudget: row.campaign.approvalStatus !== RESERVING_APPROVAL_STATUS,
     }));
   }
 

@@ -1,10 +1,14 @@
 import { InvoiceType } from '@/database/entities/campaign-expense.entity';
-import { CampaignKind } from '@/database/entities/campaign.entity';
+import { CampaignApprovalStatus, CampaignKind } from '@/database/entities/campaign.entity';
 import { CampaignStatus } from './campaigns.util';
 
 export interface CampaignListItem {
   id: number;
   kind: CampaignKind;
+  approvalStatus: CampaignApprovalStatus;
+  approvedAt: Date | null;
+  rejectedAt: Date | null;
+  taxPercentage: number | null;
   companyId: number;
   companyName: string;
   name: string;

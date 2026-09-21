@@ -15,6 +15,7 @@ import { CampaignActivityLogsController } from './campaign-activity-logs.control
 import { CampaignActivityLogsService } from './campaign-activity-logs.service';
 import { CampaignExpensesController } from './campaign-expenses.controller';
 import { CampaignExpensesService } from './campaign-expenses.service';
+import { BudgetPdfService } from './budget-pdf.service';
 import { CampaignExportService } from './campaign-export.service';
 import { CampaignGuidesController } from './campaign-guides.controller';
 import { CampaignGuidesService } from './campaign-guides.service';
@@ -61,6 +62,7 @@ import { CampaignsService } from './campaigns.service';
     CampaignExpensesService,
     CampaignActivityLogsService,
     CampaignExportService,
+    BudgetPdfService,
   ],
 })
 export class CampaignsModule {}

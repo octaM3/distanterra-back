@@ -1421,39 +1421,13 @@
       "source_location": "L11"
     },
     {
-      "id": "src_auth_jwt_strategy_jwtstrategy",
-      "label": "JwtStrategy",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "jwtstrategy",
-      "source_file": "src/auth/jwt.strategy.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_config_configuration_appconfig",
-      "label": "AppConfig",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "appconfig",
-      "source_file": "src/config/configuration.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_database_entities_admin_entity_admin",
       "label": "Admin",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "admin",
       "source_file": "src/database/entities/admin.entity.ts",
@@ -2240,19 +2214,6 @@
       "source_location": "L18"
     },
     {
-      "id": "src_auth_dto_login_dto_logindto",
-      "label": "LoginDto",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "JwtAuthGuard",
-      "file_type": "code",
-      "norm_label": "logindto",
-      "source_file": "src/auth/dto/login.dto.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "src_auth_jwt_auth_guard_jwtauthguard",
       "label": "JwtAuthGuard",
       "_callable": true,
@@ -2276,6 +2237,32 @@
       "file_type": "code",
       "norm_label": "jwtpayload",
       "source_file": "src/auth/jwt-payload.interface.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_auth_jwt_strategy_jwtstrategy",
+      "label": "JwtStrategy",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "jwtstrategy",
+      "source_file": "src/auth/jwt.strategy.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "src_config_configuration_appconfig",
+      "label": "AppConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "appconfig",
+      "source_file": "src/config/configuration.ts",
       "source_location": "L1"
     },
     {
@@ -2459,6 +2446,19 @@
       "norm_label": "campaignpackanimal",
       "source_file": "src/database/entities/campaign-pack-animal.entity.ts",
       "source_location": "L15"
+    },
+    {
+      "id": "src_auth_dto_login_dto_logindto",
+      "label": "LoginDto",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 93,
+      "community_name": "LoginDto",
+      "file_type": "code",
+      "norm_label": "logindto",
+      "source_file": "src/auth/dto/login.dto.ts",
+      "source_location": "L3"
     },
     {
       "id": "src_service_records_service_records_service_servicerecordsservice",
@@ -5779,7 +5779,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/auth/auth.service.ts",
@@ -5791,23 +5791,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/auth/jwt.strategy.ts",
       "source_location": "L16"
-    },
-    {
-      "id": "src_auth_jwt_strategy_jwtstrategy_validate",
-      "label": ".validate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": ".validate()",
-      "source_file": "src/auth/jwt.strategy.ts",
-      "source_location": "L34"
     },
     {
       "id": "src_common_guards_friendly_throttler_guard_friendlythrottlerguard_throwthrottlingexception",
@@ -7104,6 +7092,18 @@
       "norm_label": ".constructor()",
       "source_file": "src/employees/employees.service.ts",
       "source_location": "L25"
+    },
+    {
+      "id": "src_auth_jwt_strategy_jwtstrategy_validate",
+      "label": ".validate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": ".validate()",
+      "source_file": "src/auth/jwt.strategy.ts",
+      "source_location": "L34"
     },
     {
       "id": "src_campaigns_campaign_pack_animals_service_campaignpackanimalsservice_constructor",
@@ -8624,7 +8624,7 @@
       "node_kind": "heading",
       "norm_label": "documentacion",
       "source_file": "README.md",
-      "source_location": "L135"
+      "source_location": "L132"
     },
     {
       "id": "readme_estructura",
@@ -8636,7 +8636,7 @@
       "node_kind": "heading",
       "norm_label": "estructura",
       "source_file": "README.md",
-      "source_location": "L97"
+      "source_location": "L94"
     },
     {
       "id": "readme_puesta_en_marcha",
@@ -15515,46 +15515,13 @@
       "source_location": ""
     },
     {
-      "id": "src_auth_auth_module",
-      "label": "auth.module.ts",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "auth.module.ts",
-      "source_file": "src/auth/auth.module.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_auth_auth_service_ts_injectrepository",
       "label": "InjectRepository",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "injectrepository",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "src_auth_jwt_strategy",
-      "label": "jwt.strategy.ts",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "jwt.strategy.ts",
-      "source_file": "src/auth/jwt.strategy.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_auth_jwt_strategy_ts_injectable",
-      "label": "Injectable",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "injectable",
       "source_file": "",
       "source_location": ""
     },
@@ -15563,29 +15530,18 @@
       "label": "InjectRepository",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "injectrepository",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "src_config_configuration",
-      "label": "configuration.ts",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "AppConfig",
-      "file_type": "code",
-      "norm_label": "configuration.ts",
-      "source_file": "src/config/configuration.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_database_entities_admin_entity_ts_column",
       "label": "Column",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "column",
       "source_file": "",
@@ -15596,7 +15552,7 @@
       "label": "CreateDateColumn",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "createdatecolumn",
       "source_file": "",
@@ -15607,7 +15563,7 @@
       "label": "Entity",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "entity",
       "source_file": "",
@@ -15618,7 +15574,7 @@
       "label": "PrimaryGeneratedColumn",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "primarygeneratedcolumn",
       "source_file": "",
@@ -15629,7 +15585,7 @@
       "label": "UpdateDateColumn",
       "_origin": "ast",
       "community": 56,
-      "community_name": "AppConfig",
+      "community_name": "Admin",
       "file_type": "code",
       "norm_label": "updatedatecolumn",
       "source_file": "",
@@ -16197,15 +16153,15 @@
       "source_location": "L71"
     },
     {
-      "id": "package_devdependencies_nestjs_cli",
-      "label": "@nestjs/cli",
+      "id": "package_devdependencies_eslint_plugin_prettier",
+      "label": "eslint-plugin-prettier",
       "_origin": "ast",
       "community": 6,
       "community_name": "devDependencies",
       "file_type": "code",
-      "norm_label": "@nestjs/cli",
+      "norm_label": "eslint-plugin-prettier",
       "source_file": "package.json",
-      "source_location": "L58"
+      "source_location": "L73"
     },
     {
       "id": "package_devdependencies_ts_node",
@@ -16285,15 +16241,15 @@
       "source_location": "L71"
     },
     {
-      "id": "nestjs_cli",
-      "label": "@nestjs/cli",
+      "id": "eslint_plugin_prettier",
+      "label": "eslint-plugin-prettier",
       "_origin": "ast",
       "community": 6,
       "community_name": "devDependencies",
       "file_type": "concept",
-      "norm_label": "@nestjs/cli",
+      "norm_label": "eslint-plugin-prettier",
       "source_file": "package.json",
-      "source_location": "L58"
+      "source_location": "L73"
     },
     {
       "id": "ts_node",
@@ -18661,6 +18617,17 @@
       "source_location": "L31"
     },
     {
+      "id": "src_auth_auth_module",
+      "label": "auth.module.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "auth.module.ts",
+      "source_file": "src/auth/auth.module.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_auth_auth_service",
       "label": "auth.service.ts",
       "_origin": "ast",
@@ -18692,39 +18659,6 @@
       "norm_label": "currentadmin",
       "source_file": "src/auth/current-admin.decorator.ts",
       "source_location": "L7"
-    },
-    {
-      "id": "src_auth_dto_login_dto",
-      "label": "login.dto.ts",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "JwtAuthGuard",
-      "file_type": "code",
-      "norm_label": "login.dto.ts",
-      "source_file": "src/auth/dto/login.dto.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_auth_dto_login_dto_ts_isstring",
-      "label": "IsString",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "JwtAuthGuard",
-      "file_type": "code",
-      "norm_label": "isstring",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "src_auth_dto_login_dto_ts_minlength",
-      "label": "MinLength",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "JwtAuthGuard",
-      "file_type": "code",
-      "norm_label": "minlength",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "src_auth_jwt_auth_guard",
@@ -18760,6 +18694,28 @@
       "source_location": "L1"
     },
     {
+      "id": "src_auth_jwt_strategy",
+      "label": "jwt.strategy.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "jwt.strategy.ts",
+      "source_file": "src/auth/jwt.strategy.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_auth_jwt_strategy_ts_injectable",
+      "label": "Injectable",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "injectable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "src_campaigns_campaign_expenses_controller",
       "label": "campaign-expenses.controller.ts",
       "_origin": "ast",
@@ -18768,6 +18724,17 @@
       "file_type": "code",
       "norm_label": "campaign-expenses.controller.ts",
       "source_file": "src/campaigns/campaign-expenses.controller.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_config_configuration",
+      "label": "configuration.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "JwtAuthGuard",
+      "file_type": "code",
+      "norm_label": "configuration.ts",
+      "source_file": "src/config/configuration.ts",
       "source_location": "L1"
     },
     {
@@ -19534,26 +19501,37 @@
       "source_location": "L186"
     },
     {
-      "id": "package_devdependencies_eslint_plugin_prettier",
-      "label": "eslint-plugin-prettier",
+      "id": "src_auth_dto_login_dto",
+      "label": "login.dto.ts",
       "_origin": "ast",
       "community": 93,
-      "community_name": "eslint-plugin-prettier",
+      "community_name": "LoginDto",
       "file_type": "code",
-      "norm_label": "eslint-plugin-prettier",
-      "source_file": "package.json",
-      "source_location": "L73"
+      "norm_label": "login.dto.ts",
+      "source_file": "src/auth/dto/login.dto.ts",
+      "source_location": "L1"
     },
     {
-      "id": "eslint_plugin_prettier",
-      "label": "eslint-plugin-prettier",
+      "id": "src_auth_dto_login_dto_ts_isstring",
+      "label": "IsString",
       "_origin": "ast",
       "community": 93,
-      "community_name": "eslint-plugin-prettier",
-      "file_type": "concept",
-      "norm_label": "eslint-plugin-prettier",
-      "source_file": "package.json",
-      "source_location": "L73"
+      "community_name": "LoginDto",
+      "file_type": "code",
+      "norm_label": "isstring",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "src_auth_dto_login_dto_ts_minlength",
+      "label": "MinLength",
+      "_origin": "ast",
+      "community": 93,
+      "community_name": "LoginDto",
+      "file_type": "code",
+      "norm_label": "minlength",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "package_devdependencies_ts_loader",
@@ -19609,6 +19587,28 @@
       "norm_label": "@types/uuid",
       "source_file": "package.json",
       "source_location": "L68"
+    },
+    {
+      "id": "package_devdependencies_nestjs_cli",
+      "label": "@nestjs/cli",
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "@nestjs/cli",
+      "file_type": "code",
+      "norm_label": "@nestjs/cli",
+      "source_file": "package.json",
+      "source_location": "L58"
+    },
+    {
+      "id": "nestjs_cli",
+      "label": "@nestjs/cli",
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "@nestjs/cli",
+      "file_type": "concept",
+      "norm_label": "@nestjs/cli",
+      "source_file": "package.json",
+      "source_location": "L58"
     },
     {
       "id": "package_devdependencies_types_bcrypt",
@@ -51469,7 +51469,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L135",
+      "source_location": "L132",
       "weight": 1.0
     },
     {
@@ -51524,7 +51524,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L97",
+      "source_location": "L94",
       "weight": 1.0
     },
     {

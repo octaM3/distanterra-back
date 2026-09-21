@@ -28,4 +28,5 @@ COMMENT ON TABLE experiences IS 'Company experience/project entries shown on the
 COMMENT ON COLUMN experiences.description_es IS 'Ordered array of dynamic blocks: {type: "text", content} | {type: "list", items: string[]}';
 
 -- La tabla experience_bosses ("jefe/jefes") fue removida: el campo bosses ya no
--- se usa en las experiencias. Ver migración 005_drop_experience_bosses.sql.
+-- se usa en las experiencias, y desde la consolidación de los sql/ no queda
+-- rastro de ella en el esquema.

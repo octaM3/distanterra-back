@@ -3,7 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppConfig } from '@/config/configuration';
-import { Campaign, CampaignKind } from '@/database/entities/campaign.entity';
+import {
+  Campaign,
+  CampaignApprovalStatus,
+  CampaignKind,
+} from '@/database/entities/campaign.entity';
 import { CampaignActivityLog } from '@/database/entities/campaign-activity-log.entity';
 import { CampaignExpense } from '@/database/entities/campaign-expense.entity';
 import { CampaignGuide } from '@/database/entities/campaign-guide.entity';
@@ -12,8 +16,11 @@ import { CampaignStockItem } from '@/database/entities/campaign-stock-item.entit
 import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
 import { toFileUrl } from '@/common/utils/file-url.util';
 import { ServiceRecordsService } from '@/service-records/service-records.service';
+import { StockItemsService } from '@/stock-items/stock-items.service';
+import { VehiclesService } from '@/vehicles/vehicles.service';
 import { CampaignDetail, CampaignExpenseMonthSummary, CampaignListItem } from './campaigns.types';
 import {
+  assertApprovalTransition,
   computeCampaignStatus,
   computeGuideCost,
   computeStockItemCost,
@@ -47,12 +54,18 @@ export class CampaignsService {
     private readonly campaignActivityLogRepository: Repository<CampaignActivityLog>,
     private readonly configService: ConfigService<AppConfig, true>,
     private readonly serviceRecordsService: ServiceRecordsService,
+    private readonly stockItemsService: StockItemsService,
+    private readonly vehiclesService: VehiclesService,
   ) {}
 
   private toListItem(campaign: Campaign): CampaignListItem {
     return {
       id: campaign.id,
       kind: campaign.kind,
+      approvalStatus: campaign.approvalStatus,
+      approvedAt: campaign.approvedAt,
+      rejectedAt: campaign.rejectedAt,
+      taxPercentage: campaign.taxPercentage,
       companyId: campaign.companyId,
       companyName: campaign.company?.name ?? '',
       name: campaign.name,
@@ -60,16 +73,39 @@ export class CampaignsService {
       startDate: campaign.startDate,
       endDate: campaign.endDate,
       finishedAt: campaign.finishedAt,
-      status: computeCampaignStatus(campaign.startDate, campaign.endDate, campaign.finishedAt),
+      status: computeCampaignStatus(
+        campaign.startDate,
+        campaign.endDate,
+        campaign.finishedAt,
+        campaign.approvalStatus,
+      ),
       createdAt: campaign.createdAt,
     };
   }
 
-  /** `kind` separa las expediciones ("campana") de los alquileres sueltos ("servicio"); sin filtro vienen todas. */
-  async findAll(kind?: CampaignKind): Promise<CampaignListItem[]> {
-    this.logger.debug(`Obteniendo campañas${kind ? ` de tipo ${kind}` : ''}`);
+  /**
+   * `kind` separa las expediciones ("campana") de los alquileres sueltos
+   * ("servicio"); `approvalStatus` separa el trabajo en firme de los
+   * presupuestos. Los dos filtros son independientes: se presupuestan tanto
+   * campañas como servicios.
+   *
+   * Sin filtro de aprobación vienen solo las aprobadas, no todas: las
+   * pantallas de campañas y servicios existían antes que los presupuestos y
+   * listan trabajo real, así que un presupuesto no tiene que aparecer ahí
+   * salvo que se lo pida explícitamente.
+   */
+  async findAll(
+    kind?: CampaignKind,
+    approvalStatus?: CampaignApprovalStatus,
+  ): Promise<CampaignListItem[]> {
+    this.logger.debug(
+      `Obteniendo campañas${kind ? ` de tipo ${kind}` : ''} (${approvalStatus ?? 'aprobada'})`,
+    );
     const campaigns = await this.campaignRepository.find({
-      where: kind ? { kind } : {},
+      where: {
+        ...(kind ? { kind } : {}),
+        approvalStatus: approvalStatus ?? 'aprobada',
+      },
       relations: ['company'],
       order: { startDate: 'DESC' },
     });
@@ -311,23 +347,152 @@ export class CampaignsService {
     };
   }
 
+  /**
+   * Toda campaña y todo servicio nacen como presupuesto: es la única puerta
+   * de entrada, para que nada llegue a estar en firme sin haber pasado por el
+   * documento que se le mandó a la empresa. Pasar a "aprobada" es `approve`,
+   * que además reserva el equipamiento y crea el ítem de gestión.
+   */
   async create(dto: CreateCampaignDto, createdBy: number): Promise<CampaignListItem> {
-    this.logger.log(`Creando campaña: "${dto.name}"`);
+    this.logger.log(`Creando presupuesto de ${dto.kind ?? 'campana'}: "${dto.name}"`);
     if (new Date(dto.endDate) < new Date(dto.startDate)) {
       throw new BadRequestException('La fecha de fin no puede ser anterior a la fecha de inicio');
     }
-    const campaign = this.campaignRepository.create({ ...dto, createdBy });
+    const campaign = this.campaignRepository.create({
+      ...dto,
+      createdBy,
+      approvalStatus: 'presupuesto',
+      approvedAt: null,
+    });
     const saved = await this.campaignRepository.save(campaign);
-    this.logger.log(`Campaña creada con id=${saved.id}`);
-    // Su ítem de gestión nace acá: así ninguna campaña/servicio queda fuera
-    // del control de facturación por olvido.
-    await this.serviceRecordsService.createForCampaign(saved);
+    this.logger.log(`Presupuesto creado con id=${saved.id}`);
+    // Sin ítem de gestión todavía: un presupuesto no tiene nada que facturar.
+    // El suyo nace al aprobarlo.
     return this.toListItem(await this.findCampaignEntityOrFail(saved.id));
+  }
+
+  /**
+   * Conflictos de disponibilidad de un presupuesto: qué cosas de las que
+   * pidió ya no están libres en sus fechas.
+   *
+   * Hace falta porque un presupuesto no reserva nada mientras espera
+   * (RESERVING_APPROVAL_STATUS). Entre que se arma y el cliente contesta,
+   * otra campaña puede haberse llevado el equipamiento, y sin este chequeo
+   * el presupuesto se aprobaría igual y el problema aparecería recién el día
+   * de salir. La disponibilidad se mira excluyendo la propia asignación, que
+   * todavía no cuenta pero contaría si esto fuera una campaña.
+   */
+  async getApprovalConflicts(id: number): Promise<string[]> {
+    const [stockItems, vehicles] = await Promise.all([
+      this.campaignStockItemRepository.find({
+        where: { campaignId: id },
+        relations: ['stockItem'],
+      }),
+      this.campaignVehicleRepository.find({
+        where: { campaignId: id },
+        relations: ['vehicle'],
+      }),
+    ]);
+
+    const conflicts: string[] = [];
+
+    for (const assignment of stockItems) {
+      const available = await this.stockItemsService.getAvailableQuantity(
+        assignment.stockItemId,
+        assignment.startDate,
+        assignment.endDate,
+        assignment.id,
+      );
+      if (assignment.quantity > available) {
+        conflicts.push(
+          `${assignment.stockItem.name}: se presupuestaron ${assignment.quantity} y quedan ${available} libres del ${assignment.startDate} al ${assignment.endDate}.`,
+        );
+      }
+    }
+
+    for (const assignment of vehicles) {
+      const free = await this.vehiclesService.isAvailable(
+        assignment.vehicleId,
+        assignment.startDate,
+        assignment.endDate,
+        assignment.id,
+      );
+      if (!free) {
+        conflicts.push(
+          `${assignment.vehicle.licensePlate}: ya está tomado del ${assignment.startDate} al ${assignment.endDate}.`,
+        );
+      }
+    }
+
+    return conflicts;
+  }
+
+  /**
+   * Aprobar es el paso que convierte el presupuesto en trabajo real: recién
+   * acá el stock y los vehículos quedan reservados y nace el ítem de gestión
+   * para facturarlo. No se copia nada: la campaña ya estaba armada.
+   *
+   * `force` deja aprobar aunque algo ya no esté disponible. Existe porque el
+   * conflicto puede ser real y resolverse por fuera del sistema (se alquila
+   * una carpa más, se reacomoda otra campaña), y en ese caso la alternativa
+   * sería no poder registrar un trabajo que igual se va a hacer.
+   */
+  async approve(id: number, force = false): Promise<CampaignListItem> {
+    const campaign = await this.findCampaignEntityOrFail(id);
+    // Un rechazado no se aprueba de una: primero se reabre. Si no, el estado
+    // saltaría de "rechazada" a "aprobada" sin que nadie haya vuelto a mirar
+    // lo que se le había cargado ni las fechas, que a esa altura pueden estar
+    // vencidas.
+    assertApprovalTransition(campaign.approvalStatus, 'aprobada');
+
+    if (!force) {
+      const conflicts = await this.getApprovalConflicts(id);
+      if (conflicts.length > 0) {
+        throw new BadRequestException(
+          `No se puede aprobar: hay ${conflicts.length} recurso(s) que ya no están disponibles. ${conflicts.join(' ')}`,
+        );
+      }
+    }
+
+    this.logger.log(`Aprobando presupuesto id=${id}${force ? ' (forzado)' : ''}`);
+    campaign.approvalStatus = 'aprobada';
+    campaign.approvedAt = new Date();
+    campaign.rejectedAt = null;
+    await this.campaignRepository.save(campaign);
+    await this.serviceRecordsService.createForCampaign(campaign);
+    this.logger.log(`Presupuesto id=${id} aprobado: stock y vehículos reservados`);
+
+    return this.toListItem(await this.findCampaignEntityOrFail(id));
+  }
+
+  /** El cliente no lo tomó: queda archivado, sin reservar nada y fuera de los listados. */
+  async reject(id: number): Promise<CampaignListItem> {
+    const campaign = await this.findCampaignEntityOrFail(id);
+    assertApprovalTransition(campaign.approvalStatus, 'rechazada');
+    this.logger.log(`Rechazando presupuesto id=${id}`);
+    campaign.approvalStatus = 'rechazada';
+    campaign.rejectedAt = new Date();
+    await this.campaignRepository.save(campaign);
+    return this.toListItem(await this.findCampaignEntityOrFail(id));
+  }
+
+  /** Vuelve un presupuesto rechazado a la lista de pendientes (el cliente reabrió la conversación). */
+  async reopen(id: number): Promise<CampaignListItem> {
+    const campaign = await this.findCampaignEntityOrFail(id);
+    assertApprovalTransition(campaign.approvalStatus, 'presupuesto');
+    this.logger.log(`Reabriendo presupuesto id=${id}`);
+    campaign.approvalStatus = 'presupuesto';
+    campaign.rejectedAt = null;
+    await this.campaignRepository.save(campaign);
+    return this.toListItem(await this.findCampaignEntityOrFail(id));
   }
 
   async update(id: number, dto: UpdateCampaignDto): Promise<CampaignListItem> {
     this.logger.log(`Actualizando campaña id=${id}`);
-    const campaign = await this.findCampaignEntityOrFail(id);
+    // Una campaña finalizada es historia: sus costos quedaron congelados (ver
+    // effectiveEndDate) y cambiarle las fechas ahora los movería. Las
+    // pantallas ya esconden el botón de editar; esto lo cierra por API.
+    const campaign = await this.assertCampaignEditable(id);
     const nextStart = dto.startDate ?? campaign.startDate;
     const nextEnd = dto.endDate ?? campaign.endDate;
     if (new Date(nextEnd) < new Date(nextStart)) {
@@ -339,8 +504,24 @@ export class CampaignsService {
     return this.toListItem(await this.findCampaignEntityOrFail(saved.id));
   }
 
+  /**
+   * Ampliar y finalizar son acciones sobre trabajo en marcha, y un
+   * presupuesto todavía no lo es: sus fechas son una propuesta que se cambia
+   * editándolo, y no hay nada que cerrar ni stock que liberar porque nunca se
+   * reservó. Las pantallas ya esconden los botones; esto es para que tampoco
+   * se pueda por API.
+   */
+  private assertApproved(campaign: Campaign, action: string): void {
+    if (campaign.approvalStatus !== 'aprobada') {
+      throw new BadRequestException(
+        `Esto todavía es un presupuesto: no se puede ${action}. Aprobalo primero.`,
+      );
+    }
+  }
+
   async extend(id: number, dto: ExtendCampaignDto): Promise<CampaignListItem> {
     const campaign = await this.assertCampaignEditable(id);
+    this.assertApproved(campaign, 'ampliar la fecha de fin');
     if (new Date(dto.newEndDate) <= new Date(campaign.endDate)) {
       throw new BadRequestException(
         'La nueva fecha de fin debe ser posterior a la fecha de fin actual',
@@ -363,6 +544,7 @@ export class CampaignsService {
 
   async finish(id: number): Promise<CampaignListItem> {
     const campaign = await this.findCampaignEntityOrFail(id);
+    this.assertApproved(campaign, 'finalizarlo');
     if (campaign.finishedAt) {
       throw new BadRequestException('La campaña ya está finalizada');
     }

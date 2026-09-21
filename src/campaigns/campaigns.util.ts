@@ -1,7 +1,14 @@
 import { BadRequestException } from '@nestjs/common';
+import { CampaignApprovalStatus } from '@/database/entities/campaign.entity';
 import { toLocalDateString, todayLocalDateString } from '@/common/utils/date.util';
 
-export type CampaignStatus = 'planificada' | 'en_curso' | 'esperando_finalizacion' | 'finalizada';
+export type CampaignStatus =
+  | 'presupuesto'
+  | 'rechazada'
+  | 'planificada'
+  | 'en_curso'
+  | 'esperando_finalizacion'
+  | 'finalizada';
 
 /**
  * El estado no se guarda en la base: se calcula a partir de las fechas y de
@@ -17,16 +24,71 @@ export type CampaignStatus = 'planificada' | 'en_curso' | 'esperando_finalizacio
  * campaña sin que quedara claro por qué (ver StockItemsService.
  * getLockedQuantitiesToday, que sí libera por fecha aunque el estado de la
  * campaña quede en este limbo).
+ *
+ * La aprobación va primero y no mira fechas: mientras el cliente no apruebe,
+ * lo único que importa es que es un presupuesto. Un presupuesto cuyas fechas
+ * ya pasaron sigue siendo un presupuesto (vencido, pero presupuesto), no una
+ * campaña "en curso" que nadie está haciendo.
  */
 export function computeCampaignStatus(
   startDate: string,
   endDate: string,
   finishedAt: Date | null,
+  approvalStatus: CampaignApprovalStatus = 'aprobada',
 ): CampaignStatus {
+  if (approvalStatus === 'presupuesto') return 'presupuesto';
+  if (approvalStatus === 'rechazada') return 'rechazada';
   if (finishedAt) return 'finalizada';
   const today = todayLocalDateString();
   if (today > endDate) return 'esperando_finalizacion';
   return today >= startDate ? 'en_curso' : 'planificada';
+}
+
+/**
+ * Las únicas transiciones de aprobación que existen. Lo que no está acá no
+ * pasa: el estado se mueve por estos caminos o no se mueve.
+ *
+ *   presupuesto ──aprobar──> aprobada        (punto sin retorno)
+ *        │  ▲
+ *   rechazar  reabrir
+ *        ▼  │
+ *      rechazada
+ *
+ * `aprobada` no vuelve atrás a propósito. Al aprobar pasan dos cosas que no
+ * se deshacen solas: el equipamiento queda reservado y nace el ítem de
+ * gestión para facturar. Un "despresupuestar" tendría que liberar lo primero
+ * y borrar lo segundo, y mientras tanto la campaña ya podría estar en curso.
+ * Si un trabajo en firme se cae, lo que corresponde es eliminarlo.
+ */
+const ALLOWED_APPROVAL_TRANSITIONS: Record<CampaignApprovalStatus, CampaignApprovalStatus[]> = {
+  presupuesto: ['aprobada', 'rechazada'],
+  aprobada: [],
+  rechazada: ['presupuesto'],
+};
+
+const APPROVAL_LABELS: Record<CampaignApprovalStatus, string> = {
+  presupuesto: 'presupuesto',
+  aprobada: 'aprobada',
+  rechazada: 'rechazada',
+};
+
+/**
+ * Corta cualquier cambio de estado que no sea uno de los caminos permitidos,
+ * incluido quedarse en el mismo estado (aprobar dos veces, rechazar algo ya
+ * rechazado: la segunda vez pisaría la fecha de la primera).
+ */
+export function assertApprovalTransition(
+  from: CampaignApprovalStatus,
+  to: CampaignApprovalStatus,
+): void {
+  if (ALLOWED_APPROVAL_TRANSITIONS[from].includes(to)) return;
+
+  if (from === to) {
+    throw new BadRequestException(`Esto ya está en estado "${APPROVAL_LABELS[from]}".`);
+  }
+  throw new BadRequestException(
+    `No se puede pasar de "${APPROVAL_LABELS[from]}" a "${APPROVAL_LABELS[to]}".`,
+  );
 }
 
 /** Cantidad de días entre dos fechas "YYYY-MM-DD", ambas inclusive. */
@@ -149,6 +211,8 @@ export function monthKeyOf(dateStr: string): string {
 }
 
 const STATUS_LABELS: Record<CampaignStatus, string> = {
+  presupuesto: 'Presupuesto',
+  rechazada: 'Rechazada',
   planificada: 'Planificada',
   en_curso: 'En curso',
   esperando_finalizacion: 'Esperando finalización',

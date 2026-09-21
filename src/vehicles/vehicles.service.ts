@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CampaignVehicle } from '@/database/entities/campaign-vehicle.entity';
+import { RESERVING_APPROVAL_STATUS } from '@/database/entities/campaign.entity';
 import { Vehicle } from '@/database/entities/vehicle.entity';
 import { todayLocalDateString } from '@/common/utils/date.util';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -37,6 +38,12 @@ export interface VehicleOccupiedRange {
   endDate: string;
   campaignId: number;
   campaignName: string;
+  /**
+   * La asignación es de un presupuesto sin aprobar: se informa para que al
+   * armar otra campaña se vea que hay algo pedido en esos días, pero NO
+   * ocupa el vehículo (ver RESERVING_APPROVAL_STATUS).
+   */
+  isBudget: boolean;
 }
 
 @Injectable()
@@ -66,6 +73,9 @@ export class VehiclesService {
       .where('cv.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .andWhere('c.approval_status = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .getRawMany<{ vehicleId: number; campaignId: number; campaignName: string }>();
 
     const map = new Map<number, { id: number; name: string }>();
@@ -100,6 +110,9 @@ export class VehiclesService {
       .where('cv.deletedAt IS NULL')
       .andWhere('campaign.deletedAt IS NULL')
       .andWhere('campaign.finishedAt IS NULL')
+      .andWhere('campaign.approvalStatus = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .orderBy('cv.startDate', 'ASC')
       .getMany();
 
@@ -200,6 +213,9 @@ export class VehiclesService {
       .andWhere('cv.deleted_at IS NULL')
       .andWhere('c.deleted_at IS NULL')
       .andWhere('c.finished_at IS NULL')
+      .andWhere('c.approval_status = :reservingStatus', {
+        reservingStatus: RESERVING_APPROVAL_STATUS,
+      })
       .andWhere('cv.start_date <= :endDate', { endDate })
       .andWhere('cv.end_date >= :startDate', { startDate });
 
@@ -231,6 +247,9 @@ export class VehiclesService {
       .andWhere('cv.deletedAt IS NULL')
       .andWhere('campaign.deletedAt IS NULL')
       .andWhere('campaign.finishedAt IS NULL')
+      // Los presupuestos entran a propósito: el calendario los muestra como
+      // reserva blanda, sin tomar el vehículo (ver isBudget).
+      .andWhere('campaign.approvalStatus != :rejected', { rejected: 'rechazada' })
       .orderBy('cv.startDate', 'ASC');
 
     if (excludeCampaignVehicleId) {
@@ -243,6 +262,7 @@ export class VehiclesService {
       endDate: row.endDate,
       campaignId: row.campaignId,
       campaignName: row.campaign.name,
+      isBudget: row.campaign.approvalStatus !== RESERVING_APPROVAL_STATUS,
     }));
   }
 
